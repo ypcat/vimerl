@@ -2,7 +2,7 @@
 " Language:     Erlang
 " Author:       Oscar Hellström <oscar@oscarh.net> (http://oscar.hellstrom.st)
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
-" Version:      2011/03/16
+" Version:      2011/09/08
 
 " For version 5.x: Clear all syntax items
 " For version 6.x: Quit when a syntax file was already loaded
@@ -24,7 +24,9 @@ syn match erlangInteger                      /\<\%([0-9]\+#[0-9a-fA-F]\+\|[0-9]\
 syn match erlangFloat                        /\<[0-9]\+\.[0-9]\+\%(e-\?[0-9]\+\)\?\>/
 
 syn keyword erlangTodo                       TODO FIXME XXX contained
-syn match erlangComment                      /%.*$/ contains=@Spell,erlangTodo
+syn match   erlangComment                    /%.*$/ contains=@Spell,erlangTodo,erlangAnnotation
+syn match   erlangAnnotation                 /\%(%\s\)\@<=@\%(author\|clear\|copyright\|deprecated\|doc\|docfile\|end\|equiv\|headerfile\|hidden\|private\|reference\|see\|since\|spec\|throws\|title\|todo\|TODO\|type\|version\)/ contained
+syn match   erlangAnnotation                 /`[^']\+'/ contained
 
 syn keyword erlangKeyword                    band bor bnot bsl bsr bxor div rem xor
 syn keyword erlangKeyword                    try catch begin receive after cond fun let query
@@ -77,10 +79,11 @@ syn match erlangGBIF                         /erlang\%(:\w\)\@=/
 " Link Erlang stuff to Vim groups
 hi link erlangTodo           Todo
 hi link erlangString         String
-hi link erlangNoSpellString  String 
+hi link erlangNoSpellString  String
 hi link erlangModifier       SpecialChar
 hi link erlangStringModifier SpecialChar
 hi link erlangComment        Comment
+hi link erlangAnnotation     Special
 hi link erlangVariable       Identifier
 hi link erlangInclude        Include
 hi link erlangRecordDef      Keyword
