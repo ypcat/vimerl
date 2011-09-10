@@ -9,7 +9,7 @@ are implemented:
 			   Erlang introspection mechanism)
 	- Auto-indent
 	- QuickFix
-	- Wrangler support (the refactoring Erlang tool)
+	- Code skeletons for all the OTP behaviours
 	- Works well with Pathogen (http://www.vim.org/scripts/script.php?script_id=2332)
 
 
@@ -35,26 +35,6 @@ comes with it.
 == Folding ==
 
 To enable it just add to your vimrc `set foldenable'.
-
-
-== Refactoring ==
-
-* Extract to new function:
-    Select the part of code you want to extract (or point something that
-    can be extracted) and press <Alt-r>e. You will be prompted to put the name
-    of new function. After that you can Preview, Confirm or Cancel this
-    refactoring (note: Preview is not currently supported).
-
-* Rename variable/function/module:
-    Point on variable/function that name should be changed and press:
-        <Alt-r>f for function rename
-        <Alt-r>v for variable rename
-    To rename module, press <Alt-r>m anywere in the buffer.
-
-* Tuple function arguments:
-    Select or point on function arguments that should be changed into one tuple
-    and press:
-        <Alt-r>t
 
 
 == Settings ==
@@ -116,9 +96,3 @@ The option expects a 0 value for disabling and a non-zero (e.g. 1) for enabling.
 
 	- This option makes try to compile the current file each time it is saved
 	  highlighting the errors.
-
--- Refactoring options:
-The option expects a string with the path.
-
-* Set the location of the Wrangler tool: (default: "/usr/share/wrangler/")
-        g:erlangWranglerPath
