@@ -2,14 +2,16 @@
 " Language:     Erlang
 " Author:       Oscar Hellström <oscar@oscarh.net> (http://oscar.hellstrom.st)
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
-" Version:      2011/09/08
+" Version:      2011/09/10
 
-" For version 5.x: Clear all syntax items
-" For version 6.x: Quit when a syntax file was already loaded
-if version < 600
-	syntax clear
-elseif exists("b:current_syntax")
+if exists("b:current_syntax")
 	finish
+endif
+
+let b:current_syntax = "erlang"
+
+if !exists("g:erlang_highlight_bif")
+	let g:erlang_highlight_bif = 1
 endif
 
 " Erlang is case sensitive
@@ -116,10 +118,8 @@ hi link erlangBitType        Type
 hi link erlangType           Type
 hi link erlangBitSize        Number
 
-" Optional linking
-if exists("g:erlang_highlight_bif") && g:erlang_highlight_bif
+" Optional highlighting
+if g:erlang_highlight_bif
 	hi link erlangBIF    Keyword
 	hi link erlangGBIF   Keyword
 endif
-
-let b:current_syntax = "erlang"
