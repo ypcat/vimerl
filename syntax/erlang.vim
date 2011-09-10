@@ -117,7 +117,7 @@ hi link erlangType           Type
 hi link erlangBitSize        Number
 
 " Optional linking
-if exists("g:erlangHighlightBIFs") && g:erlangHighlightBIFs
+if exists("g:erlang_highlight_bif") && g:erlang_highlight_bif
 	hi link erlangBIF    Keyword
 	hi link erlangGBIF   Keyword
 endif
