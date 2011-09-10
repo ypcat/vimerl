@@ -3,25 +3,28 @@
 " Author:       Oscar Hellström <oscar@oscarh.net>
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 "               Eduardo Lopez (http://github.com/tapichu)
-" Version:      2011/03/10
+" Version:      2011/09/10
 
-" Plugin init
 if exists('b:did_ftplugin')
 	finish
 else
 	let b:did_ftplugin = 1
 endif
 
-if !exists('g:erlangKCommand')
-	let g:erlangKCommand = 'erl -man'
+if !exists('g:erlang_keywordprg')
+	let g:erlang_keywordprg = 'erl -man'
 endif
 
-if exists('s:doneFunctionDefinitions')
+if !exists('g:erlang_fold_split_function')
+	let g:erlang_fold_split_function = 0
+endif
+
+if exists('s:did_function_definitions')
 	call s:SetErlangOptions()
 	finish
 endif
 
-let s:doneFunctionDefinitions = 1
+let s:did_function_definitions = 1
 
 " Local settings
 function s:SetErlangOptions()
@@ -36,11 +39,9 @@ function s:SetErlangOptions()
 
 	setlocal comments=:%%%,:%%,:%
 	setlocal commentstring=%%s
-	setlocal formatoptions+=ro
 
-	if g:erlangKCommand != ''
-		let &l:keywordprg = g:erlangKCommand
-	endif
+	setlocal formatoptions+=ro
+	setlocal keywordprg=g:erlang_keywordprg
 endfunction
 
 " Define folding functions
@@ -85,16 +86,16 @@ if !exists('*GetErlangFold')
 		let arguments = a:arguments
 		
 		" Change list / tuples into just one A(rgument)
-		let erlangTuple = '{\([A-Za-z_,|=\-\[\]]\|\s\)*}'
-		let erlangList  = '\[\([A-Za-z_,|=\-{}]\|\s\)*\]'
+		let erlang_tuple = '{\([A-Za-z_,|=\-\[\]]\|\s\)*}'
+		let erlang_list  = '\[\([A-Za-z_,|=\-{}]\|\s\)*\]'
 
 		" FIXME: Use searchpair?
-		while arguments =~ erlangTuple
-			let arguments = substitute(arguments, erlangTuple, 'A', 'g')
+		while arguments =~ erlang_tuple
+			let arguments = substitute(arguments, erlang_tuple, 'A', 'g')
 		endwhile
 		" FIXME: Use searchpair?
-		while arguments =~ erlangList
-			let arguments = substitute(arguments, erlangList, 'A', 'g')
+		while arguments =~ erlang_list
+			let arguments = substitute(arguments, erlang_list, 'A', 'g')
 		endwhile
 		
 		let len = strlen(arguments)
@@ -115,7 +116,7 @@ if !exists('*GetErlangFold')
 		endif
 
 		if line =~ s:ErlangFunBegin && foldlevel(lnum - 1) == 1
-			if exists('g:erlangFoldSplitFunction') && g:erlangFoldSplitFunction
+			if g:erlang_fold_split_function
 				return '>1'
 			else
 				return '1'
