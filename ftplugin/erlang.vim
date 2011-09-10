@@ -27,7 +27,7 @@ let s:doneFunctionDefinitions = 1
 function s:SetErlangOptions()
 	compiler erlang
 	if version >= 700
-		setlocal omnifunc=erlangcomplete#Complete
+		setlocal omnifunc=erlang_complete#Complete
 	endif
 
 	setlocal foldmethod=expr
