@@ -1,0 +1,31 @@
+*vimerl.txt*        The Erlang plugin for Vim.
+
+
+
+                     _    ___                     __
+                    | |  / (_)___ ___  ___  _____/ /
+                    | | / / / __ `__ \/ _ \/ ___/ /
+                    | |/ / / / / / / /  __/ /  / /
+                    |___/_/_/ /_/ /_/\___/_/  /_/
+
+                    http://github.com/jimenezrick/vimerl
+
+
+
+==============================================================================
+Contents                                                     *vimerl-contents*
+
+    1. Intro ............................ |vimerl|
+
+    TODO TODO TODO
+    TODO TODO TODO
+    TODO TODO TODO
+    TODO TODO TODO
+
+==============================================================================
+1. Intro                                                              *vimerl*
+
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
