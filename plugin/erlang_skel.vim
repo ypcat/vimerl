@@ -36,11 +36,11 @@ function s:LoadSkeleton(skel_name)
 	endif
 	execute 'read' s:skels_dir . '/' . a:skel_name
 	call s:SubstituteField('modulename', expand('%:t:r'))
-	if !g:erlang_skel_replace
-		call cursor(current_line, 1)
-	else
+	if g:erlang_skel_replace
 		normal gg
 		delete
+	else
+		call cursor(current_line, 1)
 	endif
 endfunction
 
