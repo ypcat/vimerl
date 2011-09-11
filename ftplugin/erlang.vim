@@ -41,7 +41,7 @@ function s:SetErlangOptions()
 	setlocal commentstring=%%s
 
 	setlocal formatoptions+=ro
-	setlocal keywordprg=g:erlang_keywordprg
+	let &l:keywordprg = g:erlang_keywordprg
 endfunction
 
 " Define folding functions
