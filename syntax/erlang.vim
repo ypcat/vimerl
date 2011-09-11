@@ -2,13 +2,13 @@
 " Language:     Erlang
 " Author:       Oscar Hellström <oscar@oscarh.net> (http://oscar.hellstrom.st)
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
-" Version:      2011/09/10
+" Version:      2011/09/11
 
 if exists("b:current_syntax")
 	finish
+else
+	let b:current_syntax = "erlang"
 endif
-
-let b:current_syntax = "erlang"
 
 if !exists("g:erlang_highlight_bif")
 	let g:erlang_highlight_bif = 1

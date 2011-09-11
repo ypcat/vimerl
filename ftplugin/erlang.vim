@@ -3,12 +3,19 @@
 " Author:       Oscar Hellström <oscar@oscarh.net>
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 "               Eduardo Lopez (http://github.com/tapichu)
-" Version:      2011/09/10
+" Version:      2011/09/11
 
 if exists('b:did_ftplugin')
 	finish
 else
 	let b:did_ftplugin = 1
+endif
+
+if exists('s:did_function_definitions')
+	call s:SetErlangOptions()
+	finish
+else
+	let s:did_function_definitions = 1
 endif
 
 if !exists('g:erlang_keywordprg')
@@ -18,13 +25,6 @@ endif
 if !exists('g:erlang_fold_split_function')
 	let g:erlang_fold_split_function = 0
 endif
-
-if exists('s:did_function_definitions')
-	call s:SetErlangOptions()
-	finish
-endif
-
-let s:did_function_definitions = 1
 
 " Local settings
 function s:SetErlangOptions()
@@ -47,15 +47,15 @@ endfunction
 " Define folding functions
 if !exists('*GetErlangFold')
 	" Folding params
-	let s:ErlangFunBegin    = '^\a\w*(.*$'
-	let s:ErlangFunEnd      = '^[^%]*\.\s*\(%.*\)\?$'
-	let s:ErlangBlankLine   = '^\s*\(%.*\)\?$'
+	let s:erlang_fun_begin  = '^\a\w*(.*$'
+	let s:erlang_fun_end    = '^[^%]*\.\s*\(%.*\)\?$'
+	let s:erlang_blank_line = '^\s*\(%.*\)\?$'
 
 	" Auxiliary fold functions
 	function s:GetNextNonBlank(lnum)
 		let lnum = nextnonblank(a:lnum + 1)
 		let line = getline(lnum)
-		while line =~ s:ErlangBlankLine && 0 != lnum
+		while line =~ s:erlang_blank_line && 0 != lnum
 			let lnum = nextnonblank(lnum + 1)
 			let line = getline(lnum)
 		endwhile
@@ -111,11 +111,11 @@ if !exists('*GetErlangFold')
 		let lnum = a:lnum
 		let line = getline(lnum)
 
-		if line =~ s:ErlangFunEnd
+		if line =~ s:erlang_fun_end
 			return '<1'
 		endif
 
-		if line =~ s:ErlangFunBegin && foldlevel(lnum - 1) == 1
+		if line =~ s:erlang_fun_begin && foldlevel(lnum - 1) == 1
 			if g:erlang_fold_split_function
 				return '>1'
 			else
@@ -123,7 +123,7 @@ if !exists('*GetErlangFold')
 			endif
 		endif
 
-		if line =~ s:ErlangFunBegin
+		if line =~ s:erlang_fun_begin
 			return '>1'
 		endif
 
