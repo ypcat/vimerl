@@ -22,6 +22,8 @@ Contents                                                     *vimerl-contents*
     TODO TODO TODO
     TODO TODO TODO
 
+    ?. License .......................... |vimerl-license|
+
 ==============================================================================
 1. Intro                                                              *vimerl*
 
@@ -29,3 +31,13 @@ TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+
+==============================================================================
+?. License                                                    *vimerl-license*
+
+Several people have contributed to this plugin (see AUTHORS file), so it
+should be necessary to ask everybody about how its code is licensed. Anyway,
+assume that this is free software.
+
+Use, copy or modify this code freely. At least try to preserve the names of
+the authors who have participated.
