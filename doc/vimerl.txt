@@ -1,4 +1,4 @@
-*vimerl.txt*      The Erlang plugin for Vim.
+*vimerl.txt*      The Erlang plugin for Vim
 
 
 
