@@ -1,98 +1,31 @@
-  Vim Erlang plugin
-=====================
+   _    ___                     __
+  | |  / (_)___ ___  ___  _____/ /
+  | | / / / __ `__ \/ _ \/ ___/ /
+  | |/ / / / / / / /  __/ /  / /
+  |___/_/_/ /_/ /_/\___/_/  /_/
+====================================
 
-Vim plugin for the programming language Erlang. The next features
-are implemented:
-	- Syntax highlight
-	- Code folding
-	- Code completion (based on Module:module_info/1 to use the
-			   Erlang introspection mechanism)
-	- Auto-indent
-	- QuickFix
-	- Code skeletons for all the OTP behaviours
-	- Works well with Pathogen (http://www.vim.org/scripts/script.php?script_id=2332)
+The Erlang plugin for Vim.
 
 
-== Installation ==
+ How to install it
+-------------------
 
-* For local installation (one user only) copy the content of the
-  tarball to your `~/.vim' directory.
-* For global installation copy the content of the tarball to
-  your vim runtime directory (e.g. `/usr/share/vim/vimXY/').
-
-
-== Omni completion ==
-
-Write the name of a module (e.g. `my_mod:') press CTRL-X CTRL-O to activate
-the omni completion. The omni completion try to use the man pages to give
-the definition for the standard functions. The omni completion try to compile
-local modules, if it is possible, in order to call their Module:module_info/1.
-
-The program `escript' is required, the standard Erlang installation
-comes with it.
+Copy the content of the tarball to your `.vim'. It also works perfectly
+with `Pathogen' (http://github.com/tpope/vim-pathogen).
 
 
-== Folding ==
+ How to use it
+---------------
 
-To enable it just add to your vimrc `set foldenable'.
+Start with `:help vimerl'.
 
 
-== Settings ==
+ How to contribute or report bugs
+----------------------------------
 
-You can set various variables in your vimrc file to make the plugin behave
-differently.
+Send it to me:
+    Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 
--- Syntax options:
-The option expects a 0 value for disabling and a non-zero (e.g. 1) for enabling.
-
-* Highlight all Erlang BIFs (functions from `erlang' module) as keywords: (default: 0)
-	g:erlangHighlightBIFs
-
--- Folding options:
-The option expects a 0 value for disabling and a non-zero (e.g. 1) for enabling.
-
-* Splitting functions if a new function head appears: (default: 0)
-	g:erlangFoldSplitFunction
-
--- Consulting man pages options:
-The option expects a string with the program for the `K' command or an empty
-string to use the global default.
-
-* Set the program for the `K' command: (default: "erl -man")
-	g:erlangKCommand
-
--- Completion options:
-The options expect a string with the path and an integer value like before.
-
-* Set the location of the Erlang man pages: (default: "/usr/lib/erlang/man")
-	g:erlangManPath
-* Enable/disable using Erlang man pages in the code completion: (default: 1)
-	g:erlangCompletionDisplayDoc
-
-The options expect a string as below is explained.
-
-* Set the `grep' command to be use when scanning the man pages: (default: "grep")
-	g:erlangCompletionGrep
-* Set the suffix of the man page names: (default: "")
-	g:erlangManSuffix
-
-	- On Ubuntu, Erlang man pages are placed like this:
-		/ERLANG/PATH/man/man3/lists.3erl.gz
-
-		** So, you must set:
-			let g:erlangCompletionGrep="zgrep"
-			let g:erlangManSuffix="erl\.gz"
-
-	- In another systems, Erlang man pages are placed like this:
-		/ERLANG/PATH/man/man3/lists.3
-
-		** In this case, use the default options value **
-
--- Compiler options:
-The option expects a 0 value for disabling and a non-zero (e.g. 1) for enabling.
-
-* Enable/disable highlighting erlang errors: (default 1)
-        g:erlangHighlightErrors
-
-	- This option makes try to compile the current file each time it is saved
-	  highlighting the errors.
+Or use GitHub:
+    http://github.com/jimenezrick/vimerl
