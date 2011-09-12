@@ -1,16 +1,9 @@
-  Vim Erlang plugin
-=====================
 
-Vim plugin for the programming language Erlang. The next features
-are implemented:
-	- Syntax highlight
-	- Code folding
+
+
+
 	- Code completion (based on Module:module_info/1 to use the
 			   Erlang introspection mechanism)
-	- Auto-indent
-	- QuickFix
-	- Code skeletons for all the OTP behaviours
-	- Works well with Pathogen (http://www.vim.org/scripts/script.php?script_id=2332)
 
 
 == Installation ==

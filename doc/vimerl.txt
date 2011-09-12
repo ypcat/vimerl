@@ -15,25 +15,89 @@
 ==============================================================================
 Contents                                                     *vimerl-contents*
 
-    1. Intro ............................ |vimerl|
-
-    TODO TODO TODO
-    TODO TODO TODO
-    TODO TODO TODO
-    TODO TODO TODO
-
-    ?. License .......................... |vimerl-license|
+    1. Intro...............|vimerl|
+    2. Commands............|vimerl-commands|
+    3. Options.............|vimerl-options|
+    4. License.............|vimerl-license|
 
 ==============================================================================
 1. Intro                                                              *vimerl*
 
+Vimerl is a plugin for programming in Erlang. It provides several nice
+features to make your life easier when writing code.
+
+The plugin offers the following features:
+    - Syntax highlighting
+    - Code indenting
+    - Code folding
+    - Code omni completion
+    - Syntax check
+    - Compiler support
+    - Code skeletons for all the OTP behaviours
+    - Pathogen support (http://github.com/tpope/vim-pathogen)
+
+==============================================================================
+2. Commands                                                  *vimerl-commands*
+
+All the next commands are applied to the current buffer:
+
+:ErlangDisableShowErrors
+    Disables syntax check. It also hides current errors.
+
+:ErlangEnableShowErrors
+    Enables syntax check.
+
+:ErlangApplication
+    Loads an OTP application skeleton.
+
+:ErlangSupervisor
+    Loads an OTP supervisor skeleton.
+
+:ErlangGenServer
+    Loads an OTP gen_server skeleton.
+
+:ErlangGenFsm
+    Loads an OTP gen_fsm skeleton.
+
+:ErlangGenEvent
+    Loads an OTP gen_event skeleton.
+
+==============================================================================
+3. Options                                                    *vimerl-options*
+
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+
+* Falta explicar como funcionan los skeleton, omni completion, syntax check.
+
+*** SUBIR EL PLUGIN A VIM.ORG ***
+
+
+erlang_highlight_bif = 1
+
+erlang_skel_replace = 1
+erlang_skel_header
+
+erlang_keywordprg = 'erl -man'
+erlang_fold_split_function = 0
+
+erlang_show_errors = 1
+
+erlang_completion_grep = 'grep'
+erlang_man_suffix = ''
+erlang_man_path = '/usr/lib/erlang/man'
+erlang_completion_display_doc = 1
+
+
 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 
 ==============================================================================
-?. License                                                    *vimerl-license*
+4. License                                                    *vimerl-license*
 
 Several people have contributed to this plugin (see AUTHORS file), so it
 should be necessary to ask everybody about how its code is licensed. Anyway,

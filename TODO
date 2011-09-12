@@ -1,8 +1,1 @@
-- Create a Vim help file:
-    + Add a nice ANSI title
-    + Update all options names
-    + Put all new commands
-    + Explain skeletons
-
-- Fix indentation algorithm to parse correctly
-  `try..of..catch..after..end'.
+- Fix indentation algorithm to parse correctly `try..of..catch..after..end'.
