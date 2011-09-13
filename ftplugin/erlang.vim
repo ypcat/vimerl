@@ -22,10 +22,6 @@ if !exists('g:erlang_keywordprg')
 	let g:erlang_keywordprg = 'erl -man'
 endif
 
-if !exists('g:erlang_fold_split_function')
-	let g:erlang_fold_split_function = 0
-endif
-
 " Local settings
 function s:SetErlangOptions()
 	compiler erlang
@@ -116,11 +112,7 @@ if !exists('*GetErlangFold')
 		endif
 
 		if line =~ s:erlang_fun_begin && foldlevel(lnum - 1) == 1
-			if g:erlang_fold_split_function
-				return '>1'
-			else
-				return '1'
-			endif
+			return '1'
 		endif
 
 		if line =~ s:erlang_fun_begin
