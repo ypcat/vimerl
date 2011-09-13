@@ -67,6 +67,16 @@ Note: all the previous commands are applied to the current buffer.
 
 The following options offer the possibility to customize the plugin behaviour.
 
+
+
+TODO TODO TODO
+* Falta explicar como funcionan los skeleton, omni completion, syntax check.
+* Explicar el folding, mirar el antiguo README!!!
+*** SUBIR EL PLUGIN A VIM.ORG ***
+TODO TODO TODO
+
+
+
 ------------------------------------------------------------------------------
                                                       *'erlang_highlight_bif'*
 
@@ -105,31 +115,44 @@ This option defines the command used to show man-pages with the |K| command
 	:let erlang_keywordprg = "erl -man"
 
 ------------------------------------------------------------------------------
+                                                        *'erlang_show_errors'*
 
+This option controls defines if the syntax check is enabled (default: 1,
+values: 0 or 1): >
 
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-* Falta explicar como funcionan los skeleton, omni completion, syntax check.
-*** SUBIR EL PLUGIN A VIM.ORG ***
-* Explicar el folding, mirar el antiguo README!!!
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+	:let erlang_show_errors = 1
 
+------------------------------------------------------------------------------
+                                                    *'erlang_completion_grep'*
 
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+This option defines the grep program used for omni completion (default:
+"grep", values: string): >
 
-erlang_fold_split_function = 0
+	:let erlang_completion_grep = "grep"
 
-erlang_show_errors = 1
+------------------------------------------------------------------------------
+                                                      *'erlang_man_extension'*
 
-erlang_completion_grep = 'grep'
-erlang_man_suffix = ''
-erlang_man_path = '/usr/lib/erlang/man'
-erlang_completion_display_doc = 1
+This options defines the filename extension used in the man-pages (default:
+"", values: string): >
 
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+	:let erlang_man_extension = ""
+
+------------------------------------------------------------------------------
+                                                           *'erlang_man_path'*
+
+This option defined the location of the man-pages (default:
+"/usr/lib/erlang/man", values: string): >
+
+	:let erlang_man_path = "/usr/lib/erlang/man"
+
+------------------------------------------------------------------------------
+                                             *'erlang_completion_display_doc'*
+
+This option controls whether if the arguments and the returned value are show
+when using omni completion (default: 1, values: 0 or 1): >
+
+	:let erlang_completion_display_doc = 1
 
 ==============================================================================
 4. License                                                    *vimerl-license*
