@@ -55,7 +55,8 @@ use the |=| or |v_=| command.
 ------------------------------------------------------------------------------
 2.2 Code folding                                              *vimerl-folding*
 
-In order to enable/disable code folding see the |'foldenable'| Vim option.
+In order to enable/disable code folding see the |'foldenable'| Vim option and
+also enable the |'erlang_folding'| option.
 
 ------------------------------------------------------------------------------
 2.3 Code omni completion                                   *vimerl-completion*
@@ -127,6 +128,13 @@ Note: all the previous commands are applied to the current buffer.
 The following options offer the possibility to customize the plugin behaviour.
 
 ------------------------------------------------------------------------------
+                                                            *'erlang_folding'*
+
+This option controls whether automatic code folding is enabled or disabled
+(default: 0, values: 0 or 1): >
+	:let erlang_folding = 0
+
+------------------------------------------------------------------------------
                                                       *'erlang_highlight_bif'*
 
 This option controls whether BIF functions are highlighted as keywords
@@ -146,9 +154,9 @@ content of the current buffer (default: 1, values: 0 or 1): >
 This option defines the information used to fill the skeleton header. If this
 variable is not defined, then the header is not included (default: undefined,
 values: dictionary): >
-	:let erlang_skel_header = {"author": {name},
-				   "owner" : {owner},
-				   "year"  : {year}}
+	:let erlang_skel_header = {"author": "Foo Bar",
+				   "owner" : "Fubar",
+				   "year"  : "2000"}
 
 Note: the "year" key may be omitted, in that case the current year is used.
 
