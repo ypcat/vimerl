@@ -178,10 +178,11 @@ values: 0 or 1): >
                                                     *'erlang_completion_grep'*
 
 This option defines the grep program used for omni completion (default:
-"grep", values: string): >
-	:let erlang_completion_grep = "grep"
+"zgrep", values: string): >
+	:let erlang_completion_grep = "zgrep"
 
-Note: if your man-pages are compressed use "zgrep".
+Note: zgrep is able to handle compressed and uncompressed man pages, change it
+to "grep" if you don't have installed.
 
 ------------------------------------------------------------------------------
                                                            *'erlang_man_path'*
