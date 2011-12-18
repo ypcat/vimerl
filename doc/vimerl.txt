@@ -185,13 +185,6 @@ Note: zgrep is able to handle compressed and uncompressed man pages, change it
 to "grep" if you don't have installed.
 
 ------------------------------------------------------------------------------
-                                                           *'erlang_man_path'*
-
-This option defines the location of the man-pages (default:
-"/usr/lib/erlang/man", values: string): >
-	:let erlang_man_path = "/usr/lib/erlang/man"
-
-------------------------------------------------------------------------------
                                              *'erlang_completion_display_doc'*
 
 This option defines whether the arguments and the returned values of the
