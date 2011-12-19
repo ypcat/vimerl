@@ -65,12 +65,6 @@ The omni completion may be used after writing the name of a module followed by
 a colon (e.g. "lists:") pressing afterwards CTRL-X CTRL-O. The omni completion
 can be used with functions from the OTP or from your local modules.
 
-Note: the information needed for the omni completion with the OTP is extracted
-from the man-pages, so look in the options section to customize where are your
-man-pages installed.
-
-Note: it is required to have in your $PATH the escript program.
-
 ------------------------------------------------------------------------------
 2.4 Syntax check with QuickFix support                   *vimerl-syntax-check*
 
@@ -163,7 +157,7 @@ Note: the "year" key may be omitted, in that case the current year is used.
 ------------------------------------------------------------------------------
                                                          *'erlang_keywordprg'*
 
-This option defines the command used to show man-pages with the |K| command
+This option defines the command used to show man pages with the |K| command
 (default: "erl -man", values: string): >
 	:let erlang_keywordprg = "erl -man"
 
