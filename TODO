@@ -1,2 +1,6 @@
-- Fix indentation algorithm to parse correctly `try..of..catch..after..end'.
-- Review indent file from branch experimental-indent-aszlig
+- Fix indentation algorithm to parse correctly:
+  `try..of..catch..after..end'.
+- Review indent file from branch experimental-indent-aszlig.
+- Document what info is taken from `rebar.config' and that Vim should be
+  started from the project root dir, where src/, ebin/ and include/ are
+  visible.
