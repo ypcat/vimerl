@@ -2,6 +2,7 @@
 " Language:     Erlang
 " Author:       Oscar Hellström <oscar@oscarh.net> (http://oscar.hellstrom.st)
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
+" License:      GNU GPL version 3
 " Version:      2011/09/11
 
 if exists("b:current_syntax")

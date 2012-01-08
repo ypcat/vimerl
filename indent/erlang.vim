@@ -4,6 +4,7 @@
 " Contributors: Edwin Fine <efine145_nospam01 at usa dot net>
 "               Pawel 'kTT' Salata <rockplayer.pl@gmail.com>
 "               Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
+" License:      GNU GPL version 3
 " Version:      2011/09/06
 
 " Only load this indent file when no other was loaded
