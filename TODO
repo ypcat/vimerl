@@ -4,3 +4,5 @@
 - Document what info is taken from `rebar.config' and that Vim should be
   started from the project root dir, where src/, ebin/ and include/ are
   visible.
+- Use Edoc to extract the functions headers instead using grep over man
+  pages.
