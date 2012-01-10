@@ -191,4 +191,4 @@ functions are shown when using omni completion (default: 1, values: 0 or 1): >
 Vimerl is released under Vim |license|. Several people have contributed to
 this plugin (see LICENSE file).
 
- vim:tw=78:ts=8:ft=help:norl:
+ vim: tw=78 ts=8 ft=help
