@@ -3,7 +3,7 @@
 " Author:       Oscar Hellström <oscar@oscarh.net>
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 "               Eduardo Lopez (http://github.com/tapichu)
-" License:      GNU GPL version 3
+" License:      Vim license
 " Version:      2011/11/21
 
 if exists('b:did_ftplugin')
