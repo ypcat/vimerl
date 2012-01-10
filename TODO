@@ -8,3 +8,12 @@
   pages.
 - Don't compile modules for omni completion, let the user compile its
   project and then, Vimerl will use the .beam files.
+
+
+=== EDoc ===
+
+
+filename:dirname(code:where_is_file(Mod)
+Doc = edoc:get_doc(File.erl).
+{_, D} = Doc.
+E=xmerl:export([D], xmerl_xml).
