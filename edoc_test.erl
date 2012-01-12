@@ -1,12 +1,12 @@
 -module(edoc_test).
 
--export([run/1]).
+-export([module_edoc/1]).
 
 -include_lib("xmerl/include/xmerl.hrl").
 
-run([ModName]) ->
-    run(ModName);
-run(ModName) ->
+module_edoc([ModName]) ->
+    module_edoc(ModName);
+module_edoc(ModName) ->
     Mod = list_to_atom(ModName),
     {File0, _} = filename:find_src(Mod),
     File = File0 ++ ".erl",
@@ -19,7 +19,7 @@ run(ModName) ->
                 io:format("~s~n", [function_info_to_str(Name, Args, Return)])
         end,
         FunsInfo2).
-%run(_) ->
+%module_edoc(_) ->
     %bad_module.
 
 inspect_function(Fun) ->
