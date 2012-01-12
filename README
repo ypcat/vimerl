@@ -12,9 +12,9 @@ The Erlang plugin for Vim.
 -------------------
 
 Copy the content of the tarball to your `.vim'. It also works perfectly
-with `Pathogen' (http://github.com/tpope/vim-pathogen).
+with Pathogen (http://github.com/tpope/vim-pathogen).
 
-Don't forget to run `:helptags' if you are not using `Pathogen'.
+Don't forget to run `:helptags' if you are not using Pathogen.
 
 
  How to use it
