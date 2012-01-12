@@ -4,23 +4,18 @@
 
 -include_lib("xmerl/include/xmerl.hrl").
 
-module_edoc([ModName]) ->
-    module_edoc(ModName);
 module_edoc(ModName) ->
     Mod = list_to_atom(ModName),
-    {File0, _} = filename:find_src(Mod),
-    File = File0 ++ ".erl",
+    File = case filename:find_src(Mod) of
+        {error, _} ->
+            throw(bad_module);
+        {File0, _} ->
+            File0 ++ ".erl"
+    end,
     {_, Doc} = edoc:get_doc(File),
     Funs = xmerl_xpath:string("/module/functions/function", Doc),
     FunsInfo = lists:map(fun inspect_function/1, Funs),
-    FunsInfo2 = lists:keysort(1, FunsInfo),
-    lists:foreach(
-        fun({Name, Args, Return}) ->
-                io:format("~s~n", [function_info_to_str(Name, Args, Return)])
-        end,
-        FunsInfo2).
-%module_edoc(_) ->
-    %bad_module.
+    lists:keysort(1, FunsInfo).
 
 inspect_function(Fun) ->
     Name = get_attribute(Fun, "name"),
@@ -54,9 +49,6 @@ simplify_return_type({union, _, Types}) ->
 simplify_return_type(_) ->
     io:format("BIG SHIT SOMETIME HAPPENS!~n"),
     erlang:halt().
-
-function_info_to_str(Name, Args, Return) ->
-    io_lib:format("~s(~s) -> ~s", [Name, string:join(Args, ", "), Return]).
 
 get_attribute(Elem, AttrName) ->
     [Attr] = xmerl_xpath:string("@" ++ AttrName, Elem),
