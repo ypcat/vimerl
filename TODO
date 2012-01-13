@@ -7,3 +7,4 @@
   dir, where src/, ebin/ and include/ are visible.
 - Option for disabling omnicompletion cache (just prevent insert in the
   cache).
+- Revise all the doc.
