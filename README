@@ -15,9 +15,10 @@ The Erlang plugin for Vim.
 - Code indenting
 - Code folding
 - Code omni completion
-- Syntax check with quickfix support
+- Syntax checking with quickfix support
 - Code skeletons for the OTP behaviours
-- Pathogen support (http://github.com/tpope/vim-pathogen)
+- Uses configuration from Rebar
+- Pathogen compatible (http://github.com/tpope/vim-pathogen)
 
 
  How to install it

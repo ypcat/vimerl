@@ -1,9 +1,4 @@
 - Fix indentation algorithm to parse correctly:
   `try..of..catch..after..end'
   (see http://github.com/jimenezrick/vimerl/issues/7)
-- Review indent file from branch experimental-indent-aszlig.
-- Document what info is taken from `rebar.config' (on syntax check and
-  omni completion) and that Vim should be started from the project root
-  dir, where src/, ebin/ and include/ are visible.
-- Option for disabling omni completion cache (just prevent insert in the
-  cache).
+- Review indent file from branch `experimental-indent-aszlig'.
