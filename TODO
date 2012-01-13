@@ -5,6 +5,5 @@
 - Document what info is taken from `rebar.config' (on syntax check and
   omni completion) and that Vim should be started from the project root
   dir, where src/, ebin/ and include/ are visible.
-- Option for disabling omnicompletion cache (just prevent insert in the
+- Option for disabling omni completion cache (just prevent insert in the
   cache).
-- Revise all the doc.

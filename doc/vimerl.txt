@@ -37,7 +37,7 @@ The plugin offers the following features:
 	- Code indenting
 	- Code folding
 	- Code omni completion
-	- Syntax check with QuickFix support
+	- Syntax check with |Quickfix| support
 	- Code skeletons for the OTP behaviours
 	- Pathogen support (http://github.com/tpope/vim-pathogen)
 
