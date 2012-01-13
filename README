@@ -8,13 +8,23 @@
 The Erlang plugin for Vim.
 
 
+ Features
+----------
+
+- Syntax highlighting
+- Code indenting
+- Code folding
+- Code omni completion
+- Syntax check with quickfix support
+- Code skeletons for the OTP behaviours
+- Pathogen support (http://github.com/tpope/vim-pathogen)
+
+
  How to install it
 -------------------
 
-Copy the content of the tarball to your `.vim'. It also works perfectly
-with Pathogen (http://github.com/tpope/vim-pathogen).
-
-Don't forget to run `:helptags' if you are not using Pathogen.
+Copy the content of the tarball to your `.vim'. Don't forget to run
+`:helptags' if you are not using Pathogen.
 
 
  How to use it
