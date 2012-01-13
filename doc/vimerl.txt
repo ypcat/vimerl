@@ -168,23 +168,6 @@ This option controls if the syntax check is enabled or disabled (default: 1,
 values: 0 or 1): >
 	:let erlang_show_errors = 1
 
-------------------------------------------------------------------------------
-                                                    *'erlang_completion_grep'*
-
-This option defines the grep program used for omni completion (default:
-"zgrep", values: string): >
-	:let erlang_completion_grep = "zgrep"
-
-Note: zgrep is able to handle compressed and uncompressed man pages, change it
-to "grep" if you don't have installed.
-
-------------------------------------------------------------------------------
-                                             *'erlang_completion_display_doc'*
-
-This option defines whether the arguments and the returned values of the
-functions are shown when using omni completion (default: 1, values: 0 or 1): >
-	:let erlang_completion_display_doc = 1
-
 ==============================================================================
 5. License                                                    *vimerl-license*
 
