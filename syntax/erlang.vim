@@ -3,7 +3,7 @@
 " Author:       Oscar Hellström <oscar@oscarh.net> (http://oscar.hellstrom.st)
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 " License:      Vim license
-" Version:      2011/09/11
+" Version:      2012/01/13
 
 if exists("b:current_syntax")
 	finish
