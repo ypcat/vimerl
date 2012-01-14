@@ -1,0 +1,5 @@
+- Usar gen_tcpd para tener un demonio que escuche petiones de indentar,
+  al abrir un fichero erlang, Vim intenta crear un nuevo servidor, si
+  falla es que ya esta creado. Usa un puerto local.
+- Que soporte ademas indentado de varias lineas.
+- Cada peticion que sea: tcp <file> <num_line>
