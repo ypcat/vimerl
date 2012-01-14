@@ -2,4 +2,8 @@
   al abrir un fichero erlang, Vim intenta crear un nuevo servidor, si
   falla es que ya esta creado. Usa un puerto local.
 - Que soporte ademas indentado de varias lineas.
-- Cada peticion que sea: tcp <file> <num_line>
+- Cada peticion que sea:
+    tcp <file> <num_line>
+- Con escript se pueden ejecutar .beam, y arrancan mas rapido:
+    escript indent.erl
+  Probar a usar eso primero para indentar, no hacer el servidor!
