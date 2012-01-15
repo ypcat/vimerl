@@ -3,6 +3,7 @@
 -compile(export_all).
 
 read_file(File) ->
+    % TODO: Leer por lineas con string:tokens(List, "\n")
     {ok, Bin} = file:read_file(File),
     binary_to_list(Bin).
 
@@ -13,6 +14,8 @@ tokenize_source(Source) ->
     eat_shebang(tokenize(Source)).
 
 tokenize(Source) ->
+    % TODO: Añadir a los tokens "({[]})" la columna.
+    %       Ir buscando por linea la columna de cada uno.
     {ok, Tokens, _} = erl_scan:string(Source),
     Tokens.
 
@@ -42,6 +45,8 @@ line(Token) -> element(2, Token).
 % TODO: Proteger con un try si hay un badmatch
 parse_block([{'-', _} | Tokens]) ->
     parse_attribute(Tokens);
+% TODO: guardar tambien al funcion en el Stack esperando encontrar `->', mientras,
+% guardar la columna igual a 2 tab
 parse_block([{atom, _, _} | Tokens]) ->
     parse_function(Tokens, []).
 
@@ -62,6 +67,15 @@ parse_attribute2([_ | _], Stack) ->
     % TODO: Usar la cola para indentar!
 parse_attribute2([_ | _], []) -> 0.
 
+%%% TODO TODO TODO
+%%% En el Stack guardar solo los symbolos sin emparejar, una vez se entrentra el
+%%% simetrico, sacarlo. Pero guardar tambien loa if, case y try.
+%%%
+%%% Hacer mejor un record para guardar el estado.
+%%%
+%%% Guardar en el estado el nivel de sangrado (tab) y si hay algo en el Stack,
+%%% tambien la columna.
+%%% TODO TODO TODO
 
 
 
