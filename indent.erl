@@ -25,9 +25,30 @@ tokenize(Source) ->
     {ok, Tokens, _} = erl_scan:string(Source),
     Tokens.
 
-eat_shebang([{'#', L}, {'!', L} | Tokens]) ->
-    lists:dropwhile(fun(T) -> line(T) =< L end, Tokens);
+eat_shebang([{'#', N}, {'!', N} | Tokens]) ->
+    lists:dropwhile(fun(T) -> line(T) =< N end, Tokens);
 eat_shebang(Tokens) -> Tokens.
+
+%%% ----------------------------------------------------------------------------
+
+take_current_block(LinesToks, N) when N < 1 ->
+    error(badarg, [LinesToks, N]);
+take_current_block([], _) ->
+    [];
+take_current_block(LinesToks, N) ->
+    drop_next_lines(lists:reverse(LinesToks), N).
+
+drop_next_lines([Tokens | LinesToks], N) ->
+    RevToks = lists:reverse(Tokens),
+    case lists:dropwhile(fun(T) -> line(T) >= N end, RevToks) of
+        [] ->
+            drop_next_lines(LinesToks, N);
+        RevToks2 ->
+            lists:reverse(LinesToks) ++ [ists:reverse(RevToks2)]
+    end.
+
+line(Token) -> element(2, Token).
+
 
 
 
@@ -56,23 +77,6 @@ indent_source_line(Source, N) ->
             end
     end.
 
-search_prev_line(LinesToks, N) ->
-    search_prev_line2(lists:reverse(LinesToks), N).
-
-search_prev_line2(LinesToks, N) when N < 1 ->
-    error(badarg, [LinesToks, N]);
-search_prev_line2([], _) ->
-    throw(line_not_found);
-search_prev_line2([Tokens | LinesToks], N) ->
-    RevToks = lists:reverse(Tokens),
-    case lists:dropwhile(fun(T) -> line(T) >= N end, RevToks) of
-        [] ->
-            search_prev_line2(LinesToks, N);
-        RevToks2 ->
-            {RevToks2, LinesToks}
-    end.
-
-line(Token) -> element(2, Token).
 
 %%% ----------------------------------------------------------------------------
 %%% Tests
