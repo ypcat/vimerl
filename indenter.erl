@@ -30,6 +30,46 @@ type(Token) -> element(1, Token).
 
 line(Token) -> element(2, Token).
 
+%%% --- TODO -------------------------------------------------------------------
+
+
+
+
+
+% TODO: si falla el parseo, dar por defecto a la linea la misma
+%       indentacion que tenia la anterior
+
+% TODO: Proteger con un try si hay un badmatch
+parse_block([{'-', _} | Tokens]) ->
+    parse_attribute(Tokens);
+parse_block([{atom, _, _} | Tokens]) ->
+    parse_function(Tokens, []).
+
+
+parse_attribute1([{atom, _, _} | Tokens]) ->
+    parse_attribute2(Tokens, []).
+
+% TODO: Guardar la linea de un parenteses para luego poder encontrarlo
+parse_attribute2([{'(', N} | Tokens], Stack) ->
+    parse_attribute2(Tokens, [{'(', N}, Stack]);
+parse_attribute2([{')', _} | Tokens], [_ | Stack]) ->
+    parse_attribute2(Tokens, Stack);
+
+parse_attribute2([{'.', _} | Tokens], [_ | Stack]) ->
+    parse_attribute2(Tokens, Stack);
+
+parse_attribute2([_ | _], Stack) ->
+    % TODO: Usar la cola para indentar!
+parse_attribute2([_ | _], []) -> 0.
+
+
+
+
+parse_attribute([], []) -> 0;
+parse_attribute([], Stack) ->
+
+
+
 %%% ----------------------------------------------------------------------------
 %%% Tests
 %%% ----------------------------------------------------------------------------
