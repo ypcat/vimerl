@@ -3,35 +3,58 @@
 -compile(export_all).
 
 read_file(File) ->
-    % TODO: Leer por lineas con string:tokens(List, "\n")
-    {ok, Bin} = file:read_file(File),
-    binary_to_list(Bin).
+    case file:read_file(File) of
+        {ok, Bin} ->
+            binary_to_list(Bin);
+        Error ->
+            throw(Error)
+    end.
 
 tokenize_file(File) ->
-    tokenize_source(read_file(File)).
+    try
+        tokenize_source(read_file(File))
+    catch
+        throw:Error ->
+            Error
+    end.
 
 tokenize_source(Source) ->
-    eat_shebang(tokenize(Source)).
+    try
+        eat_shebang(tokenize(Source))
+    catch
+        throw:Error ->
+            Error
+    end.
 
 tokenize(Source) ->
-    % TODO: Añadir a los tokens "(,{,[,],},)" la columna.
-    %       Ir buscando por linea la columna de cada uno.
-    {ok, Tokens, _} = erl_scan:string(Source),
-    Tokens.
+    case erl_scan:string(Source, {1, 1}) of
+        {ok, Tokens, _} ->
+            Tokens;
+        Error ->
+            throw(Error)
+    end.
 
-eat_shebang([{'#', N}, {'!', N} | Tokens]) ->
-    lists:dropwhile(fun(T) -> line(T) == N end, Tokens);
-eat_shebang(Tokens) -> Tokens.
+eat_shebang([T1 = {'#', _}, T2 = {'!', _} | Tokens]) ->
+    case {line(T1), line(T2)} of
+        {N, N} ->
+            lists:dropwhile(fun(T) -> line(T) == N end, Tokens);
+        _ ->
+            Tokens
+    end;
+eat_shebang(Tokens) ->
+    Tokens.
 
 take_tokens_block(Tokens, N) when N < 1 ->
     error(badarg, [Tokens, N]);
 take_tokens_block(Tokens, N) ->
     PrevToks = lists:reverse(lists:takewhile(fun(T) -> line(T) < N end, Tokens)),
-    lists:reverse(lists:takewhile(fun(T) -> type(T) /= dot end, PrevToks)).
+    lists:reverse(lists:takewhile(fun(T) -> category(T) /= dot end, PrevToks)).
 
-type(Token) -> element(1, Token).
+category(Token) -> erl_scan:token_info(Token, category).
 
-line(Token) -> element(2, Token).
+line(Token) -> erl_scan:token_info(Token, line).
+
+column(Token) -> erl_scan:token_info(Token, column).
 
 %%% TODO -----------------------------------------------------------------------
 
@@ -86,7 +109,7 @@ next_relevant_token(Tokens) ->
 irrelevant_token(Token) ->
     Chars = ['(', '{', '[', '-', dot],
     KeyWords = ['receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
-    Type = type(Token),
+    Type = category(Token),
     not lists:keymember(Type, 1, Chars ++ KeyWords).
 
 %%% ----------------------------------------------------------------------------
