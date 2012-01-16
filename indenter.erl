@@ -14,7 +14,7 @@ tokenize_source(Source) ->
     eat_shebang(tokenize(Source)).
 
 tokenize(Source) ->
-    % TODO: Añadir a los tokens "({[]})" la columna.
+    % TODO: Añadir a los tokens "(,{,[,],},)" la columna.
     %       Ir buscando por linea la columna de cada uno.
     {ok, Tokens, _} = erl_scan:string(Source),
     Tokens.
@@ -33,56 +33,61 @@ type(Token) -> element(1, Token).
 
 line(Token) -> element(2, Token).
 
-%%% --- TODO -------------------------------------------------------------------
+%%% TODO -----------------------------------------------------------------------
+
+-record(state, {stack = [], tabs = [0], cols = [0]}).
+-record(indentation, {tab = 0, col = 0}).
+
+parse_tokens(Tokens) ->
+    try
+        parse_tokens2(Tokens)
+    catch
+        throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
+            #indentation{tab = hd(Tabs), col = hd(Cols)}
+    end.
+
+parse_tokens2(Tokens = [{'-', _} | _]) ->
+    parse_attribute(Tokens, #state{});
+parse_tokens2(Tokens = [{atom, _, _} | _]) ->
+    parse_function(Tokens, #state{}).
+
+parse_attribute([T = {'-', _} | Tokens], State = #state{stack = [], tabs = []}) ->
+    parse_generic(Tokens, State#state{stack = [T], Tabs = [1]}).
+
+parse_function([T = {atom, _, _} | Tokens], State = #state{stack = [], tabs = []}) ->
+    parse_generic(Tokens, State#state{stack = [T], Tabs = [2]}).
+
+parse_generic(Tokens, State) ->
+    parse_generic2(next_relevant_token(Tokens, State)).
 
 
 
-
-
-% TODO: si falla el parseo, dar por defecto a la linea la misma
-%       indentacion que tenia la anterior
-
-% TODO: Proteger con un try si hay un badmatch
-parse_block([{'-', _} | Tokens]) ->
-    parse_attribute(Tokens);
-% TODO: guardar tambien al funcion en el Stack esperando encontrar `->', mientras,
-% guardar la columna igual a 2 tab
-parse_block([{atom, _, _} | Tokens]) ->
-    parse_function(Tokens, []).
-
-
-parse_attribute1([{atom, _, _} | Tokens]) ->
-    parse_attribute2(Tokens, []).
-
-% TODO: Guardar la linea de un parenteses para luego poder encontrarlo
-parse_attribute2([{'(', N} | Tokens], Stack) ->
-    parse_attribute2(Tokens, [{'(', N}, Stack]);
-parse_attribute2([{')', _} | Tokens], [_ | Stack]) ->
-    parse_attribute2(Tokens, Stack);
-
-parse_attribute2([{'.', _} | Tokens], [_ | Stack]) ->
-    parse_attribute2(Tokens, Stack);
-
-parse_attribute2([_ | _], Stack) ->
-    % TODO: Usar la cola para indentar!
-parse_attribute2([_ | _], []) -> 0.
-
-%%% TODO TODO TODO
-%%% En el Stack guardar solo los symbolos sin emparejar, una vez se entrentra el
-%%% simetrico, sacarlo. Pero guardar tambien loa if, case y try.
-%%%
-%%% Hacer mejor un record para guardar el estado.
-%%%
-%%% Guardar en el estado el nivel de sangrado (tab) y si hay algo en el Stack,
-%%% tambien la columna.
-%%% TODO TODO TODO
+%%%%%%%%%%%%%%
+% XXX: hay que indicar una columna siempre, por defecto la misma que el tab
+parse_generic2([T = {'(', _} | Tokens], State = #state{stack = Stack, tabs = Tabs, cols = Cols}) ->
+    Tab = hd(Tabs) + 2,
+    Col = 'XXX', % Coger aqui la columna + 1 del anterior (,{,[ del stack
+    parse_generic(Tokens, State#state{stack = [T | Stack], tab = [hd(Tabs) | Tabs]}); % XXX: Refinar
+parse_generic2([{')', _} | Tokens], State = #state{stack = [{'(', _} | Stack]}) ->
+%%%%%%%%%%%%%%
 
 
 
-parse_attribute([], []) -> 0;
-parse_attribute([], Stack) ->
+parse_generic2([{dot, _}], _) ->
+    #indentacion{};
+parse_generic2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
+    #indentacion{tab = Tab, col = Col};
+parse_generic2(_, State) ->
+    throw(parse_error, State).
 
+next_relevant_token(Tokens) ->
+    lists:dropwhile(fun irrelevant_token/1, Tokens).
 
+irrelevant_token(Token) ->
+    Chars = ['(', '{', '[', '-', '.'],
+    KeyWords = [receive, fun, if, case, try, catch, after, end],
+    Type = type(Token),
+    not lists:keymember(Type, 1, Chars ++ KeyWords).
 
 %%% ----------------------------------------------------------------------------
 %%% Tests
