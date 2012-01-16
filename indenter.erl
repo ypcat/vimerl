@@ -52,40 +52,40 @@ parse_tokens2(Tokens = [{atom, _, _} | _]) ->
     parse_function(Tokens, #state{}).
 
 parse_attribute([T = {'-', _} | Tokens], State = #state{stack = [], tabs = []}) ->
-    parse_generic(Tokens, State#state{stack = [T], Tabs = [1]}).
+    parse_generic(Tokens, State#state{stack = [T], tabs = [1]}).
 
 parse_function([T = {atom, _, _} | Tokens], State = #state{stack = [], tabs = []}) ->
-    parse_generic(Tokens, State#state{stack = [T], Tabs = [2]}).
+    parse_generic(Tokens, State#state{stack = [T], tabs = [2]}).
 
 parse_generic(Tokens, State) ->
-    parse_generic2(next_relevant_token(Tokens, State)).
+    parse_generic2(next_relevant_token(Tokens), State).
 
 
 
 %%%%%%%%%%%%%%
 % XXX: hay que indicar una columna siempre, por defecto la misma que el tab
-parse_generic2([T = {'(', _} | Tokens], State = #state{stack = Stack, tabs = Tabs, cols = Cols}) ->
-    Tab = hd(Tabs) + 2,
-    Col = 'XXX', % Coger aqui la columna + 1 del anterior (,{,[ del stack
-    parse_generic(Tokens, State#state{stack = [T | Stack], tab = [hd(Tabs) | Tabs]}); % XXX: Refinar
-parse_generic2([{')', _} | Tokens], State = #state{stack = [{'(', _} | Stack]}) ->
+%parse_generic2([T = {'(', _} | Tokens], State = #state{stack = Stack, tabs = Tabs, cols = Cols}) ->
+%    Tab = hd(Tabs) + 2,
+%    Col = 'XXX', % Coger aqui la columna + 1 del anterior (,{,[ del stack
+%    parse_generic(Tokens, State#state{stack = [T | Stack], tab = [hd(Tabs) | Tabs]}); % XXX: Refinar
+%parse_generic2([{')', _} | Tokens], State = #state{stack = [{'(', _} | Stack]}) ->
 %%%%%%%%%%%%%%
 
 
 
 parse_generic2([{dot, _}], _) ->
-    #indentacion{};
+    #indentation{};
 parse_generic2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
-    #indentacion{tab = Tab, col = Col};
+    #indentation{tab = Tab, col = Col};
 parse_generic2(_, State) ->
-    throw(parse_error, State).
+    throw({parse_error, State}).
 
 next_relevant_token(Tokens) ->
     lists:dropwhile(fun irrelevant_token/1, Tokens).
 
 irrelevant_token(Token) ->
-    Chars = ['(', '{', '[', '-', '.'],
-    KeyWords = [receive, fun, if, case, try, catch, after, end],
+    Chars = ['(', '{', '[', '-', dot],
+    KeyWords = ['receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Type = type(Token),
     not lists:keymember(Type, 1, Chars ++ KeyWords).
 
