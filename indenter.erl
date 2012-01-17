@@ -131,11 +131,16 @@ pop(State = #state{stack = Stack}) ->
 parse_generic(Tokens, State) ->
     parse_generic2(next_relevant_token(Tokens), State).
 
-parse_generic2([T = {'(', _} | Tokens], State) ->
+parse_generic2([T | Tokens], State) when ?TOKEN_IS(T, '('); ?TOKEN_IS(T, '{'); ?TOKEN_IS(T, '[') ->
     parse_generic(Tokens, push(State, T, 0, column(T) + 1));
-parse_generic2([{')', _} | Tokens], State = #state{stack = [{'(', _} | _]}) ->
-    parse_generic(Tokens, pop(State));
-parse_generic2([{dot, _}], #state{stack = [X]}) when ?TOKEN_IS(X, '-'); ?TOKEN_IS(X, atom) ->
+parse_generic2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?TOKEN_IS(T1, ')'); ?TOKEN_IS(T1, '}'); ?TOKEN_IS(T1, ']') ->
+    case symmetrical(T1) == category(T2) of
+        true ->
+            parse_generic(Tokens, pop(State));
+        false ->
+            throw({parse_error, State})
+    end;
+parse_generic2([{dot, _}], #state{stack = [T]}) when ?TOKEN_IS(T, '-'); ?TOKEN_IS(T, atom) ->
     {0, 0};
 parse_generic2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
     {Tab, Col};
@@ -150,6 +155,11 @@ irrelevant_token(Token) ->
     Keywords = ['when', 'receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
+
+symmetrical(')')   -> '(';
+symmetrical('}')   -> '{';
+symmetrical(']')   -> '[';
+symmetrical(Token) -> symmetrical(category(Token)).
 
 %%% ----------------------------------------------------------------------------
 %%% Tests
