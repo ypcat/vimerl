@@ -2,6 +2,21 @@
 
 -compile(export_all).
 
+-export([indent_file/2]).
+
+%%% TODO TODO TODO
+%%% indent_file(File)
+%%% indent_file(File, Start, End)
+%%%
+%%% Hacer tambien rutinas para que muestre el fichero indentado
+%%% TODO TODO TODO
+
+indent_file(File, Line) ->
+    % FIXME: hacer el try-catch en indent_file/1,2,3
+    Tokens = tokenize_file(File),
+    Tokens2 = indenter:take_tokens_block(Tokens, Line),
+    indent_after(Tokens2).
+
 read_file(File) ->
     case file:read_file(File) of
         {ok, Bin} ->
@@ -44,10 +59,10 @@ eat_shebang([T1 = {'#', _}, T2 = {'!', _} | Tokens]) ->
 eat_shebang(Tokens) ->
     Tokens.
 
-take_tokens_block(Tokens, N) when N < 1 ->
-    error(badarg, [Tokens, N]);
-take_tokens_block(Tokens, N) ->
-    PrevToks = lists:reverse(lists:takewhile(fun(T) -> line(T) < N end, Tokens)),
+take_tokens_block(Tokens, Line) when Line < 1 ->
+    error(badarg, [Tokens, Line]);
+take_tokens_block(Tokens, Line) ->
+    PrevToks = lists:reverse(lists:takewhile(fun(T) -> line(T) < Line end, Tokens)),
     lists:reverse(lists:takewhile(fun(T) -> category(T) /= dot end, PrevToks)).
 
 category(Token) ->
@@ -113,7 +128,7 @@ parse_generic(Tokens, State) ->
     parse_generic2(next_relevant_token(Tokens), State).
 
 parse_generic2([T = {'(', _} | Tokens], State) ->
-    parse_generic(Tokens, push(State, T, 0, column(T)));
+    parse_generic(Tokens, push(State, T, 0, column(T) + 1));
 parse_generic2([{')', _} | Tokens], State = #state{stack = [{'(', _} | _]}) ->
     parse_generic(Tokens, pop(State));
 parse_generic2([{dot, _}], #state{stack = [X]}) when element(1, X) == '-'; element(1, X) == atom ->
@@ -130,7 +145,7 @@ irrelevant_token(Token) ->
     Chars = ['(', ')', '{', '}', '[', ']', '->', ',', ';', dot],
     Keywords = ['when', 'receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Cat = category(Token),
-    not lists:keymember(Cat, 1, Chars ++ Keywords).
+    not lists:member(Cat, Chars ++ Keywords).
 
 %%% ----------------------------------------------------------------------------
 %%% Tests
@@ -154,7 +169,7 @@ bar() ->
 ").
 
 tokenize_source_test() ->
-    io:format("~p~n", [tokenize_source(?TEST_SOURCE)]).
+    tokenize_source(?TEST_SOURCE).
 
 take_tokens_block_test() ->
-    io:format("~p~n", [take_tokens_block(tokenize_source(?TEST_SOURCE), 14)]).
+    take_tokens_block(tokenize_source(?TEST_SOURCE), 14).
