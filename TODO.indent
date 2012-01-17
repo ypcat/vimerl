@@ -6,4 +6,3 @@
     tcp <file> <num_line>
 - Con escript se pueden ejecutar .beam, y arrancan mas rapido:
     escript indent.erl
-  Probar a usar eso primero para indentar, no hacer el servidor!
