@@ -50,11 +50,17 @@ take_tokens_block(Tokens, N) ->
     PrevToks = lists:reverse(lists:takewhile(fun(T) -> line(T) < N end, Tokens)),
     lists:reverse(lists:takewhile(fun(T) -> category(T) /= dot end, PrevToks)).
 
-category(Token) -> erl_scan:token_info(Token, category).
+category(Token) ->
+    {category, Cat} = erl_scan:token_info(Token, category),
+    Cat.
 
-line(Token) -> erl_scan:token_info(Token, line).
+line(Token) ->
+    {line, Line} = erl_scan:token_info(Token, line),
+    Line.
 
-column(Token) -> erl_scan:token_info(Token, column).
+column(Token) ->
+    {column, Col} = erl_scan:token_info(Token, column),
+    Col.
 
 %%% TODO -----------------------------------------------------------------------
 
