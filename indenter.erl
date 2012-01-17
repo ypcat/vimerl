@@ -4,6 +4,8 @@
 
 -export([file_indentation/2]).
 
+-define(TOKEN_IS(Token, Cat), element(1, Token) == Cat).
+
 %%% TODO TODO TODO
 %%% indent_file(File)
 %%% indent_file(File, Start, End)
@@ -53,13 +55,8 @@ tokenize(Source) ->
             throw(Error)
     end.
 
-eat_shebang([T1 = {'#', _}, T2 = {'!', _} | Tokens]) ->
-    case {line(T1), line(T2)} of
-        {N, N} ->
-            lists:dropwhile(fun(T) -> line(T) == N end, Tokens);
-        _ ->
-            Tokens
-    end;
+eat_shebang([{'#', {N, _}}, {'!', {N, _}} | Tokens]) ->
+    lists:dropwhile(fun(T) -> line(T) == N end, Tokens);
 eat_shebang(Tokens) ->
     Tokens.
 
@@ -90,6 +87,7 @@ indentation_after(Tokens) ->
         filter_no_column(parse_tokens(Tokens))
     catch
         throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
+            io:format("parse_error~n"), % XXX
             filter_no_column({hd(Tabs), hd(Cols)})
     end.
 
@@ -137,7 +135,7 @@ parse_generic2([T = {'(', _} | Tokens], State) ->
     parse_generic(Tokens, push(State, T, 0, column(T) + 1));
 parse_generic2([{')', _} | Tokens], State = #state{stack = [{'(', _} | _]}) ->
     parse_generic(Tokens, pop(State));
-parse_generic2([{dot, _}], #state{stack = [X]}) when element(1, X) == '-'; element(1, X) == atom ->
+parse_generic2([{dot, _}], #state{stack = [X]}) when ?TOKEN_IS(X, '-'); ?TOKEN_IS(X, atom) ->
     {0, 0};
 parse_generic2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
     {Tab, Col};
