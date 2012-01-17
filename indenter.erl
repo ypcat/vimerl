@@ -97,11 +97,25 @@ indent(State, Tab, Col) ->
     Cols = State#state.cols,
     State#state{tabs = [Tab + hd(Tabs) | Tabs], cols = [Col | Cols]}.
 
+unindent(State = #state{tabs = Tabs, cols = Cols}) ->
+    State#state{tabs = tl(Tabs), cols = tl(Cols)}.
+
+push(State, Token, Tab) ->
+    push(State, Token, Tab, none).
+
+push(State = #state{stack = Stack}, Token, Tab, Col) ->
+    indent(State#state{stack = [Token | Stack]}, Tab, Col).
+
+pop(State = #state{stack = Stack}) ->
+    unindent(State#state{stack = tl(Stack)}).
+
 parse_generic(Tokens, State) ->
     parse_generic2(next_relevant_token(Tokens), State).
 
-parse_generic2([T = {'(', _} | Tokens], State = #state{stack = Stack}) ->
-    parse_generic(Tokens, indent(State#state{stack = [T | Stack]}, 0, column(T)));
+parse_generic2([T = {'(', _} | Tokens], State) ->
+    parse_generic(Tokens, push(State, T, 0, column(T)));
+parse_generic2([{')', _} | Tokens], State = #state{stack = [{'(', _} | _]}) ->
+    parse_generic(Tokens, pop(State));
 parse_generic2([{dot, _}], #state{stack = [X]}) when element(1, X) == '-'; element(1, X) == atom ->
     {0, 0};
 parse_generic2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
