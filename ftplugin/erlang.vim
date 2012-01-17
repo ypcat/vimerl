@@ -4,7 +4,7 @@
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 "               Eduardo Lopez (http://github.com/tapichu)
 " License:      Vim license
-" Version:      2011/11/21
+" Version:      2012/01/18
 
 if exists('b:did_ftplugin')
 	finish
@@ -79,8 +79,7 @@ if !exists('*GetErlangFold')
 			endif
 			let str .= getline(lnum)
 		endwhile
-		return matchstr(str, 
-			\ '\(^(\s*\)\@<=.*\(\s*)\(\s\+when\s\+.*\)\?\s\+->\s*\(%.*\)\?$\)\@=')
+		return matchstr(str, '\(^(\s*\)\@<=.*\(\s*)\(\s\+when\s\+.*\)\?\s\+->\s*\(%.*\)\?$\)\@=')
 	endfunction
 
 	function s:CountFunArgs(arguments)
