@@ -27,6 +27,8 @@ The Erlang plugin for Vim.
 Copy the content of the tarball to your `.vim'. Don't forget to run
 `:helptags' if you are not using Pathogen.
 
+Vimerl requires to have Erlang installed in your system.
+
 
  How to use it
 ---------------
