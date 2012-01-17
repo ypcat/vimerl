@@ -96,20 +96,22 @@ indentation_after(Tokens) ->
 filter_no_column({Tab, none}) -> Tab;
 filter_no_column({Tab, Col})  -> {Tab, Col}.
 
-%% TODO: Puede no hacer match ninguna funcion de las de abajo
 parse_tokens(Tokens = [{'-', _} | _]) ->
     parse_attribute(Tokens, #state{});
 parse_tokens(Tokens = [{atom, _, _} | _]) ->
-    parse_function(Tokens, #state{}).
+    parse_function(Tokens, #state{});
+parse_tokens(_) ->
+    throw({parse_error, #state{}}).
 
 parse_attribute([T = {'-', _} | Tokens], State = #state{stack = []}) ->
-    parse_generic(Tokens, indent(State#state{stack = [T]}, 0)).
+    parse_generic(Tokens, push(State, T, 0));
+parse_attribute(_, State) ->
+    throw({parse_error, State}).
 
 parse_function([T = {atom, _, _} | Tokens], State = #state{stack = []}) ->
-    parse_generic(Tokens, indent(State#state{stack = [T]}, 2)).
-
-indent(State, Tab) ->
-    indent(State, Tab, none).
+    parse_generic(Tokens, push(State, T, 2));
+parse_function(_, State) ->
+    throw({parse_error, State}).
 
 indent(State, Tab, Col) ->
     Tabs = State#state.tabs,
