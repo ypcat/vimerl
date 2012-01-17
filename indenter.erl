@@ -64,20 +64,29 @@ column(Token) ->
 
 %%% TODO -----------------------------------------------------------------------
 
--record(state, {stack = [], tabs = [0], cols = [0]}).
--record(indentation, {tab = 0, col = 0}).
+-record(state, {stack = [], tabs = [0], cols = [none]}).
 
-parse_tokens(Tokens) ->
+indent_after(Tokens) ->
     try
-        parse_tokens2(Tokens)
+        filter_column(parse_tokens(Tokens))
     catch
         throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
-            #indentation{tab = hd(Tabs), col = hd(Cols)}
+            filter_column({hd(Tabs), hd(Cols)})
     end.
 
-parse_tokens2(Tokens = [{'-', _} | _]) ->
+filter_column({Tab, none}) -> Tab;
+filter_column({Tab, Col})  -> {Tab, Col}.
+
+
+
+
+
+
+%%% TODO: cuando una regla no meta en la pila un numero de columna, meter un 'none'
+%%%       para indicar que solo es valido el nuermo de tab.
+parse_tokens(Tokens = [{'-', _} | _]) ->
     parse_attribute(Tokens, #state{});
-parse_tokens2(Tokens = [{atom, _, _} | _]) ->
+parse_tokens(Tokens = [{atom, _, _} | _]) ->
     parse_function(Tokens, #state{}).
 
 parse_attribute([T = {'-', _} | Tokens], State = #state{stack = [], tabs = []}) ->
@@ -86,8 +95,6 @@ parse_attribute([T = {'-', _} | Tokens], State = #state{stack = [], tabs = []}) 
 parse_function([T = {atom, _, _} | Tokens], State = #state{stack = [], tabs = []}) ->
     parse_generic(Tokens, State#state{stack = [T], tabs = [2]}).
 
-parse_generic(Tokens, State) ->
-    parse_generic2(next_relevant_token(Tokens), State).
 
 
 
@@ -101,11 +108,13 @@ parse_generic(Tokens, State) ->
 %%%%%%%%%%%%%%
 
 
+parse_generic(Tokens, State) ->
+    parse_generic2(next_relevant_token(Tokens), State).
 
-parse_generic2([{dot, _}], _) ->
-    #indentation{};
+parse_generic2([{dot, _}], #state{stack = [X]}) when element(1, X) == '-'; element(1, X) == atom ->
+    {0, 0};
 parse_generic2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
-    #indentation{tab = Tab, col = Col};
+    {Tab, Col};
 parse_generic2(_, State) ->
     throw({parse_error, State}).
 
@@ -113,10 +122,10 @@ next_relevant_token(Tokens) ->
     lists:dropwhile(fun irrelevant_token/1, Tokens).
 
 irrelevant_token(Token) ->
-    Chars = ['(', '{', '[', '-', dot],
-    KeyWords = ['receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
-    Type = category(Token),
-    not lists:keymember(Type, 1, Chars ++ KeyWords).
+    Chars = ['(', ')', '{', '}', '[', ']', '->', ',', ';', dot],
+    Keywords = ['when', 'receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
+    Cat = category(Token),
+    not lists:keymember(Cat, 1, Chars ++ Keywords).
 
 %%% ----------------------------------------------------------------------------
 %%% Tests
