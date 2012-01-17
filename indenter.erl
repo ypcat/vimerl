@@ -1,10 +1,20 @@
--module(indenter).
+#!/usr/bin/env escript
 
+%-module(indenter).
 -compile(export_all).
-
--export([file_indentation/2]).
+%-export([file_indentation/2]).
 
 -define(TOKEN_IS(Token, Cat), element(1, Token) == Cat).
+
+main([File, Line]) ->
+    case file_indentation(File, list_to_integer(Line)) of
+        {Tab, Col} ->
+            io:format("~B ~B~n", [Tab, Col]);
+        Tab ->
+            io:format("~B~n", [Tab])
+    end;
+main(_) ->
+    'XXX'.
 
 %%% TODO TODO TODO
 %%% indent_file(File)
@@ -19,7 +29,7 @@
 file_indentation(File, Line) ->
     % FIXME: hacer el try-catch en indent_file/1,2,3
     Tokens = tokenize_file(File),
-    Tokens2 = indenter:take_tokens_block(Tokens, Line),
+    Tokens2 = take_tokens_block(Tokens, Line),
     % TODO: este retorna la indentacion, indent_file() lo indenta.
     indentation_after(Tokens2).
 
@@ -87,7 +97,7 @@ indentation_after(Tokens) ->
         filter_no_column(parse_tokens(Tokens))
     catch
         throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
-            io:format("parse_error~n"), % XXX
+            %io:format("parse_error~n"), % XXX
             filter_no_column({hd(Tabs), hd(Cols)})
     end.
 
@@ -148,7 +158,8 @@ parse_generic2(_, State) ->
     throw({parse_error, State}).
 
 next_relevant_token(Tokens) ->
-    lists:dropwhile(fun irrelevant_token/1, Tokens).
+    lists:dropwhile(fun(T) -> irrelevant_token(T) end, Tokens).
+    %lists:dropwhile(fun irrelevant_token/1, Tokens). % XXX: not in escript
 
 irrelevant_token(Token) ->
     Chars = ['(', ')', '{', '}', '[', ']', '->', ',', ';', dot],
