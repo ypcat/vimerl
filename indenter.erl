@@ -68,37 +68,37 @@ column(Token) ->
 
 indent_after(Tokens) ->
     try
-        filter_column(parse_tokens(Tokens))
+        filter_no_column(parse_tokens(Tokens))
     catch
         throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
-            filter_column({hd(Tabs), hd(Cols)})
+            filter_no_column({hd(Tabs), hd(Cols)})
     end.
 
-filter_column({Tab, none}) -> Tab;
-filter_column({Tab, Col})  -> {Tab, Col}.
+filter_no_column({Tab, none}) -> Tab;
+filter_no_column({Tab, Col})  -> {Tab, Col}.
 
-
-
-
-
-
-%%% TODO: cuando una regla no meta en la pila un numero de columna, meter un 'none'
-%%%       para indicar que solo es valido el nuermo de tab.
 parse_tokens(Tokens = [{'-', _} | _]) ->
     parse_attribute(Tokens, #state{});
 parse_tokens(Tokens = [{atom, _, _} | _]) ->
     parse_function(Tokens, #state{}).
 
-parse_attribute([T = {'-', _} | Tokens], State = #state{stack = [], tabs = []}) ->
-    parse_generic(Tokens, State#state{stack = [T], tabs = [1]}).
+parse_attribute([T = {'-', _} | Tokens], State = #state{stack = []}) ->
+    parse_generic(Tokens, indent(State#state{stack = [T]}, 0)).
 
-parse_function([T = {atom, _, _} | Tokens], State = #state{stack = [], tabs = []}) ->
-    parse_generic(Tokens, State#state{stack = [T], tabs = [2]}).
+parse_function([T = {atom, _, _} | Tokens], State = #state{stack = []}) ->
+    parse_generic(Tokens, indent(State#state{stack = [T]}, 2)).
 
+indent(State, Tab) ->
+    indent(State, Tab, none).
 
-
+indent(State, Tab, Col) ->
+    Tabs = State#state.tabs,
+    Cols = State#state.cols,
+    State#state{tabs = [Tab + hd(Tabs) | Tabs], cols = [Col + hd(Cols) | Cols]}.
 
 %%%%%%%%%%%%%%
+% TODO: cuando una regla no meta en la pila un numero de columna, meter un 'none'
+%       para indicar que solo es valido el nuermo de tab.
 % XXX: hay que indicar una columna siempre, por defecto la misma que el tab
 %parse_generic2([T = {'(', _} | Tokens], State = #state{stack = Stack, tabs = Tabs, cols = Cols}) ->
 %    Tab = hd(Tabs) + 2,
