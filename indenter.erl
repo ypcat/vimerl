@@ -2,7 +2,7 @@
 
 -compile(export_all).
 
--export([indent_file/2]).
+-export([file_indentation/2]).
 
 %%% TODO TODO TODO
 %%% indent_file(File)
@@ -11,11 +11,15 @@
 %%% Hacer tambien rutinas para que muestre el fichero indentado
 %%% TODO TODO TODO
 
-indent_file(File, Line) ->
+% TODO: usar string:strip() para quitar los espacios de una linea y luego indentarla
+% indent_file() ->
+
+file_indentation(File, Line) ->
     % FIXME: hacer el try-catch en indent_file/1,2,3
     Tokens = tokenize_file(File),
     Tokens2 = indenter:take_tokens_block(Tokens, Line),
-    indent_after(Tokens2).
+    % TODO: este retorna la indentacion, indent_file() lo indenta.
+    indentation_after(Tokens2).
 
 read_file(File) ->
     case file:read_file(File) of
@@ -81,7 +85,7 @@ column(Token) ->
 
 -record(state, {stack = [], tabs = [0], cols = [none]}).
 
-indent_after(Tokens) ->
+indentation_after(Tokens) ->
     try
         filter_no_column(parse_tokens(Tokens))
     catch
