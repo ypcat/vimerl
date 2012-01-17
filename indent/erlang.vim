@@ -4,23 +4,28 @@
 " License:  Vim license
 " Version:  2012/01/17
 
-if exists("b:did_indent")
-    finish
+if exists('b:did_indent')
+	finish
 else
-    let b:did_indent = 1
+	let b:did_indent = 1
 endif
 
-setlocal indentexpr=ErlangIndent()
-setlocal indentkeys+==after,=end,=catch,=),=],=} " XXX: Revisar
+let s:erlang_indent_file = expand('<sfile>:p:h') . '/erlang_indent.erl'
 
-if exists("*ErlangIndent")
-    finish
+setlocal indentexpr=ErlangIndent()
+setlocal indentkeys==after,=catch,=end,=),=],=}
+
+if exists('*ErlangIndent')
+	finish
 endif
 
 function ErlangIndent()
-    " v:lnum
-    " getline(v:lnum)
-    " indent(v:lnum)
+	" TODO: Faster with erl -noshell -run script main ... -run erlang halt
+	let indentation = split(system(s:erlang_indent_file . ' ' . expand('%') . ' ' . v:lnum))
 
-    return 2 * &shiftwidth
+	if len(indentation) == 1
+		return indentation[0] * &shiftwidth
+	else
+		return indentation[1]
+	endif
 endfunction
