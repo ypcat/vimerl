@@ -2,7 +2,7 @@
 " Language: Erlang
 " Author:   Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 " License:  Vim license
-" Version:  2012/01/17
+" Version:  2012/01/18
 
 if exists('b:did_indent')
 	finish
@@ -10,14 +10,14 @@ else
 	let b:did_indent = 1
 endif
 
-let s:erlang_indent_file = expand('<sfile>:p:h') . '/erlang_indent.erl'
-
 setlocal indentexpr=ErlangIndent()
-setlocal indentkeys==after,=catch,=end,=),=],=}
+setlocal indentkeys=!^F,o,O,=after,=catch,=end,=),=},=]
 
 if exists('*ErlangIndent')
 	finish
 endif
+
+let s:erlang_indent_file = expand('<sfile>:p:h') . '/erlang_indent.erl'
 
 function ErlangIndent()
 	" TODO: Faster with erl -noshell -run script main ... -run erlang halt
