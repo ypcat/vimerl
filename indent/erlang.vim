@@ -21,6 +21,7 @@ let s:erlang_indent_file = expand('<sfile>:p:h') . '/erlang_indent.erl'
 
 function ErlangIndent()
 	" TODO: Faster with erl -noshell -run script main ... -run erlang halt
+	" TODO: Use system(cmd, input), getbufline() and join()
 	let indentation = split(system(s:erlang_indent_file . ' ' . expand('%') . ' ' . v:lnum))
 
 	if len(indentation) == 1
