@@ -1,21 +1,40 @@
-#!/usr/bin/env escript
+%#!/usr/bin/env escript
 
-%-module(indenter).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-module(erlang_indent).
 -compile(export_all).
-%-export([file_indentation/2]).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 -define(TOKEN_IS(Token, Cat), element(1, Token) == Cat).
 
+%%% TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+%%% TODO: hacer una rutina que retorne el estado del parser para indentar varias lineas
+%%%
+%%% indent_file(File)
+%%% indent_file(File, Start, End)
+%%%
+%%% Hacer tambien rutinas para que muestre el fichero indentado
+%%%
+%%% TODO: usar string:strip() para quitar los espacios de una linea y luego indentarla
+%%% TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+
+%% TODO: Handle thrown exceptions
+main([File, Line]) ->
+    Source = read_file(File),
+    format_indentation(source_indentation(Source, list_to_integer(Line)));
 main([Line]) ->
     Source = read_stdin(),
-    case source_indentation(Source, list_to_integer(Line)) of
-        {Tab, Col} ->
-            io:format("~B ~B~n", [Tab, Col]);
-        Tab ->
-            io:format("~B~n", [Tab])
-    end;
+    format_indentation(source_indentation(Source, list_to_integer(Line)));
 main(_) ->
-    'XXX'.
+    bad_opts.
+
+read_file(File) ->
+    case file:read_file(File) of
+        {ok, Bin} ->
+            binary_to_list(Bin);
+        Error ->
+            throw(Error)
+    end.
 
 read_stdin() ->
     read_stdin([]).
@@ -28,60 +47,20 @@ read_stdin(L) ->
             read_stdin([Data | L])
     end.
 
-
-
-%main([File, Line]) ->
-    %case file_indentation(File, list_to_integer(Line)) of
-        %{Tab, Col} ->
-            %io:format("~B ~B~n", [Tab, Col]);
-        %Tab ->
-            %io:format("~B~n", [Tab])
-    %end;
-%main(_) ->
-    %'XXX'.
-
-%%% TODO TODO TODO
-%%% indent_file(File)
-%%% indent_file(File, Start, End)
-%%%
-%%% Hacer tambien rutinas para que muestre el fichero indentado
-%%% TODO TODO TODO
-
-% TODO: usar string:strip() para quitar los espacios de una linea y luego indentarla
-% indent_file() ->
+format_indentation({Tab, none}) ->
+    io:format("~B~n", [Tab]);
+format_indentation({Tab, Col}) ->
+    io:format("~B ~B~n", [Tab, Col]).
 
 source_indentation(Source, Line) ->
-    % FIXME: hacer el try-catch en indent_file/1,2,3
     Tokens = tokenize_source(Source),
-    Tokens2 = take_tokens_block(Tokens, Line),
-    % TODO: este retorna la indentacion, indent_file() lo indenta.
+    Tokens2 = take_tokens_block_before(Tokens, Line),
     indentation_after(Tokens2).
 
-read_file(File) ->
-    case file:read_file(File) of
-        {ok, Bin} ->
-            binary_to_list(Bin);
-        Error ->
-            throw(Error)
-    end.
-
-tokenize_file(File) ->
-    try
-        tokenize_source(read_file(File))
-    catch
-        throw:Error ->
-            Error
-    end.
-
 tokenize_source(Source) ->
-    try
-        eat_shebang(tokenize(Source))
-    catch
-        throw:Error ->
-            Error
-    end.
+    eat_shebang(tokenize_source2(Source)).
 
-tokenize(Source) ->
+tokenize_source2(Source) ->
     case erl_scan:string(Source, {1, 1}) of
         {ok, Tokens, _} ->
             Tokens;
@@ -94,9 +73,9 @@ eat_shebang([{'#', {N, _}}, {'!', {N, _}} | Tokens]) ->
 eat_shebang(Tokens) ->
     Tokens.
 
-take_tokens_block(Tokens, Line) when Line < 1 ->
+take_tokens_block_before(Tokens, Line) when Line < 1 ->
     error(badarg, [Tokens, Line]);
-take_tokens_block(Tokens, Line) ->
+take_tokens_block_before(Tokens, Line) ->
     PrevToks = lists:reverse(lists:takewhile(fun(T) -> line(T) < Line end, Tokens)),
     lists:reverse(lists:takewhile(fun(T) -> category(T) /= dot end, PrevToks)).
 
@@ -118,15 +97,12 @@ column(Token) ->
 
 indentation_after(Tokens) ->
     try
-        filter_no_column(parse_tokens(Tokens))
+        parse_tokens(Tokens)
     catch
         throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
-            %io:format("parse_error~n"), % XXX
-            filter_no_column({hd(Tabs), hd(Cols)})
+            io:format("Parse error~n"), % XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
+            {hd(Tabs), hd(Cols)}
     end.
-
-filter_no_column({Tab, none}) -> Tab;
-filter_no_column({Tab, Col})  -> {Tab, Col}.
 
 parse_tokens(Tokens = [{'-', _} | _]) ->
     parse_attribute(Tokens, #state{});
@@ -221,4 +197,4 @@ tokenize_source_test() ->
     tokenize_source(?TEST_SOURCE).
 
 take_tokens_block_test() ->
-    take_tokens_block(tokenize_source(?TEST_SOURCE), 14).
+    take_tokens_block_before(tokenize_source(?TEST_SOURCE), 14).
