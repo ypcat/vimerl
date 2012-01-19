@@ -1,9 +1,9 @@
 #!/usr/bin/env escript
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FIXME
 -module(erlang_indent).
 -compile(export_all).
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FIXME
 
 -define(TOKEN_IS(Token, Cat), element(1, Token) == Cat).
 
@@ -54,8 +54,8 @@ format_indentation({Tab, Col}) ->
 
 source_indentation(Source, Line) ->
     Tokens = tokenize_source(Source),
-    Tokens2 = take_tokens_block_before(Tokens, Line),
-    indentation_after(Tokens2).
+    {PrevToks, NextToks} = split_prev_block(Tokens, Line),
+    indentation_between(PrevToks, NextToks).
 
 tokenize_source(Source) ->
     eat_shebang(tokenize_source2(Source)).
@@ -73,11 +73,13 @@ eat_shebang([{'#', {N, _}}, {'!', {N, _}} | Tokens]) ->
 eat_shebang(Tokens) ->
     Tokens.
 
-take_tokens_block_before(Tokens, Line) when Line < 1 ->
+split_prev_block(Tokens, Line) when Line < 1 ->
     error(badarg, [Tokens, Line]);
-take_tokens_block_before(Tokens, Line) ->
-    PrevToks = lists:reverse(lists:takewhile(fun(T) -> line(T) < Line end, Tokens)),
-    lists:reverse(lists:takewhile(fun(T) -> category(T) /= dot end, PrevToks)).
+split_prev_block(Tokens, Line) ->
+    {PrevToks, NextToks} = lists:splitwith(fun(T) -> line(T) < Line end, Tokens),
+    PrevToks2 = lists:reverse(PrevToks),
+    PrevToks3 = lists:takewhile(fun(T) -> category(T) /= dot end, PrevToks2),
+    {lists:reverse(PrevToks3), NextToks}.
 
 category(Token) ->
     {category, Cat} = erl_scan:token_info(Token, category),
@@ -95,9 +97,15 @@ column(Token) ->
 
 -record(state, {stack = [], tabs = [0], cols = [none]}).
 
-indentation_after(Tokens) ->
+indentation_between(PrevToks, NextToks) ->
     try
-        parse_tokens(Tokens)
+        {Tab, Col} = parse_tokens(PrevToks),
+        case NextToks of
+            [] ->
+                {Tab, Col};
+            [T | _] when ?TOKEN_IS(T, ')'); ?TOKEN_IS(T, '}'); ?TOKEN_IS(T, ']') ->
+                {Tab, Col - 1}
+        end
     catch
         throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
             io:format("Parse error~n"), % XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
@@ -121,10 +129,10 @@ parse_function([T = {atom, _, _} | Tokens], State = #state{stack = []}) ->
 parse_function(_, State) ->
     throw({parse_error, State}).
 
-indent(State, Tab, Col) ->
+indent(State, IncTab, Col) ->
     Tabs = State#state.tabs,
     Cols = State#state.cols,
-    State#state{tabs = [Tab + hd(Tabs) | Tabs], cols = [Col | Cols]}.
+    State#state{tabs = [hd(Tabs) + IncTab | Tabs], cols = [Col | Cols]}.
 
 unindent(State = #state{tabs = Tabs, cols = Cols}) ->
     State#state{tabs = tl(Tabs), cols = tl(Cols)}.
@@ -167,7 +175,8 @@ irrelevant_token(Token) ->
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
 
-symmetrical(')')   -> '(';
-symmetrical('}')   -> '{';
-symmetrical(']')   -> '[';
-symmetrical(Token) -> symmetrical(category(Token)).
+symmetrical(Token) when is_tuple(Token) ->
+    symmetrical(category(Token));
+symmetrical(')') -> '(';
+symmetrical('}') -> '{';
+symmetrical(']') -> '['.
