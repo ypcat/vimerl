@@ -142,7 +142,7 @@ parse_generic(Tokens, State) ->
     parse_generic2(next_relevant_token(Tokens), State).
 
 parse_generic2([T | Tokens], State) when ?TOKEN_IS(T, '('); ?TOKEN_IS(T, '{'); ?TOKEN_IS(T, '[') ->
-    parse_generic(Tokens, push(State, T, 0, column(T) + 1));
+    parse_generic(Tokens, push(State, T, 0, column(T)));
 parse_generic2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?TOKEN_IS(T1, ')'); ?TOKEN_IS(T1, '}'); ?TOKEN_IS(T1, ']') ->
     case symmetrical(T1) == category(T2) of
         true ->
@@ -162,7 +162,8 @@ next_relevant_token(Tokens) ->
     %lists:dropwhile(fun irrelevant_token/1, Tokens). % XXX: not in escript
 
 irrelevant_token(Token) ->
-    Chars = ['(', ')', '{', '}', '[', ']', '->', ',', ';', dot],
+    %Chars = ['(', ')', '{', '}', '[', ']', '->', ',', ';', dot], % FIXME: Not handling well the comma
+    Chars = ['(', ')', '{', '}', '[', ']', '->', ';', dot],
     Keywords = ['when', 'receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
