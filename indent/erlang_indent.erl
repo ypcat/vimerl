@@ -19,7 +19,7 @@
 %%% TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 
 %% TODO: Handle thrown exceptions
-main([File, Line]) ->
+main([Line, File]) ->
     Source = read_file(File),
     format_indentation(source_indentation(Source, list_to_integer(Line)));
 main([Line]) ->
@@ -42,7 +42,7 @@ read_stdin() ->
 read_stdin(L) ->
     case io:get_chars("", 4096) of
         eof ->
-            lists:reverse(L);
+            lists:flatten(lists:reverse(L));
         Data ->
             read_stdin([Data | L])
     end.
