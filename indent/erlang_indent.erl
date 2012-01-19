@@ -103,6 +103,7 @@ indentation_between(PrevToks, NextToks) ->
     try
         {Tab, Col} = parse_tokens(PrevToks),
         case NextToks of
+            % FIXME: Check that Col /= none
             [T | _] when ?TOKEN_IS(T, ')'); ?TOKEN_IS(T, '}'); ?TOKEN_IS(T, ']') ->
                 {Tab, Col - 1};
             _ ->
