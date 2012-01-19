@@ -19,7 +19,8 @@ endif
 
 let s:erlang_indent_file = expand('<sfile>:p:h') . '/erlang_indent.erl'
 
-" TODO: writefile(), readfile() funcionan sobre un FIFO con os:cmd/1, usar 2 FIFOs.
+" TODO: writefile(), readfile() funcionan sobre un FIFO con os:cmd("cat fifo"), usar 2 FIFOs.
+" TODO: optimizar y solo enviar desde la ultima linea que sea: ^\(-\)[a-z']
 function ErlangIndent()
 	if v:lnum == 1
 		return 0
