@@ -1,37 +1,32 @@
 #!/usr/bin/env escript
 
-%-module(indenter).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FIXME
+-module(erlang_indent).
 -compile(export_all).
-%-export([file_indentation/2]).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FIXME
 
 -define(TOKEN_IS(Token, Cat), element(1, Token) == Cat).
 
-main([File, Line]) ->
-    case file_indentation(File, list_to_integer(Line)) of
-        {Tab, Col} ->
-            io:format("~B ~B~n", [Tab, Col]);
-        Tab ->
-            io:format("~B~n", [Tab])
-    end;
-main(_) ->
-    'XXX'.
-
-%%% TODO TODO TODO
+%%% TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+%%% TODO: hacer una rutina que retorne el estado del parser para indentar varias lineas
+%%%
 %%% indent_file(File)
 %%% indent_file(File, Start, End)
 %%%
 %%% Hacer tambien rutinas para que muestre el fichero indentado
-%%% TODO TODO TODO
+%%%
+%%% TODO: usar string:strip() para quitar los espacios de una linea y luego indentarla
+%%% TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 
-% TODO: usar string:strip() para quitar los espacios de una linea y luego indentarla
-% indent_file() ->
-
-file_indentation(File, Line) ->
-    % FIXME: hacer el try-catch en indent_file/1,2,3
-    Tokens = tokenize_file(File),
-    Tokens2 = take_tokens_block(Tokens, Line),
-    % TODO: este retorna la indentacion, indent_file() lo indenta.
-    indentation_after(Tokens2).
+%% TODO: Handle thrown exceptions
+main([Line, File]) ->
+    Source = read_file(File),
+    format_indentation(source_indentation(Source, list_to_integer(Line)));
+main([Line]) ->
+    Source = read_stdin(),
+    format_indentation(source_indentation(Source, list_to_integer(Line)));
+main(_) ->
+    bad_opts.
 
 read_file(File) ->
     case file:read_file(File) of
@@ -41,23 +36,31 @@ read_file(File) ->
             throw(Error)
     end.
 
-tokenize_file(File) ->
-    try
-        tokenize_source(read_file(File))
-    catch
-        throw:Error ->
-            Error
+read_stdin() ->
+    read_stdin([]).
+
+read_stdin(L) ->
+    case io:get_chars("", 4096) of
+        eof ->
+            lists:flatten(lists:reverse(L));
+        Data ->
+            read_stdin([Data | L])
     end.
+
+format_indentation({Tab, none}) ->
+    io:format("~B~n", [Tab]);
+format_indentation({Tab, Col}) ->
+    io:format("~B ~B~n", [Tab, Col]).
+
+source_indentation(Source, Line) ->
+    Tokens = tokenize_source(Source),
+    {PrevToks, NextToks} = split_prev_block(Tokens, Line),
+    indentation_between(PrevToks, NextToks).
 
 tokenize_source(Source) ->
-    try
-        eat_shebang(tokenize(Source))
-    catch
-        throw:Error ->
-            Error
-    end.
+    eat_shebang(tokenize_source2(Source)).
 
-tokenize(Source) ->
+tokenize_source2(Source) ->
     case erl_scan:string(Source, {1, 1}) of
         {ok, Tokens, _} ->
             Tokens;
@@ -70,11 +73,13 @@ eat_shebang([{'#', {N, _}}, {'!', {N, _}} | Tokens]) ->
 eat_shebang(Tokens) ->
     Tokens.
 
-take_tokens_block(Tokens, Line) when Line < 1 ->
+split_prev_block(Tokens, Line) when Line < 1 ->
     error(badarg, [Tokens, Line]);
-take_tokens_block(Tokens, Line) ->
-    PrevToks = lists:reverse(lists:takewhile(fun(T) -> line(T) < Line end, Tokens)),
-    lists:reverse(lists:takewhile(fun(T) -> category(T) /= dot end, PrevToks)).
+split_prev_block(Tokens, Line) ->
+    {PrevToks, NextToks} = lists:splitwith(fun(T) -> line(T) < Line end, Tokens),
+    PrevToks2 = lists:reverse(PrevToks),
+    PrevToks3 = lists:takewhile(fun(T) -> category(T) /= dot end, PrevToks2),
+    {lists:reverse(PrevToks3), NextToks}.
 
 category(Token) ->
     {category, Cat} = erl_scan:token_info(Token, category),
@@ -92,17 +97,20 @@ column(Token) ->
 
 -record(state, {stack = [], tabs = [0], cols = [none]}).
 
-indentation_after(Tokens) ->
+indentation_between(PrevToks, NextToks) ->
     try
-        filter_no_column(parse_tokens(Tokens))
+        {Tab, Col} = parse_tokens(PrevToks),
+        case NextToks of
+            [] ->
+                {Tab, Col};
+            [T | _] when ?TOKEN_IS(T, ')'); ?TOKEN_IS(T, '}'); ?TOKEN_IS(T, ']') ->
+                {Tab, Col - 1}
+        end
     catch
         throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
-            %io:format("parse_error~n"), % XXX
-            filter_no_column({hd(Tabs), hd(Cols)})
+            io:format("Parse error~n"), % XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
+            {hd(Tabs), hd(Cols)}
     end.
-
-filter_no_column({Tab, none}) -> Tab;
-filter_no_column({Tab, Col})  -> {Tab, Col}.
 
 parse_tokens(Tokens = [{'-', _} | _]) ->
     parse_attribute(Tokens, #state{});
@@ -121,10 +129,10 @@ parse_function([T = {atom, _, _} | Tokens], State = #state{stack = []}) ->
 parse_function(_, State) ->
     throw({parse_error, State}).
 
-indent(State, Tab, Col) ->
+indent(State, IncTab, Col) ->
     Tabs = State#state.tabs,
     Cols = State#state.cols,
-    State#state{tabs = [Tab + hd(Tabs) | Tabs], cols = [Col | Cols]}.
+    State#state{tabs = [hd(Tabs) + IncTab | Tabs], cols = [Col | Cols]}.
 
 unindent(State = #state{tabs = Tabs, cols = Cols}) ->
     State#state{tabs = tl(Tabs), cols = tl(Cols)}.
@@ -142,7 +150,7 @@ parse_generic(Tokens, State) ->
     parse_generic2(next_relevant_token(Tokens), State).
 
 parse_generic2([T | Tokens], State) when ?TOKEN_IS(T, '('); ?TOKEN_IS(T, '{'); ?TOKEN_IS(T, '[') ->
-    parse_generic(Tokens, push(State, T, 0, column(T) + 1));
+    parse_generic(Tokens, push(State, T, 0, column(T)));
 parse_generic2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?TOKEN_IS(T1, ')'); ?TOKEN_IS(T1, '}'); ?TOKEN_IS(T1, ']') ->
     case symmetrical(T1) == category(T2) of
         true ->
@@ -159,42 +167,16 @@ parse_generic2(_, State) ->
 
 next_relevant_token(Tokens) ->
     lists:dropwhile(fun(T) -> irrelevant_token(T) end, Tokens).
-    %lists:dropwhile(fun irrelevant_token/1, Tokens). % XXX: not in escript
 
 irrelevant_token(Token) ->
-    Chars = ['(', ')', '{', '}', '[', ']', '->', ',', ';', dot],
+    %Chars = ['(', ')', '{', '}', '[', ']', '->', ',', ';', dot], % FIXME: Not handling well the comma
+    Chars = ['(', ')', '{', '}', '[', ']', '->', ';', dot],
     Keywords = ['when', 'receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
 
-symmetrical(')')   -> '(';
-symmetrical('}')   -> '{';
-symmetrical(']')   -> '[';
-symmetrical(Token) -> symmetrical(category(Token)).
-
-%%% ----------------------------------------------------------------------------
-%%% Tests
-%%% ----------------------------------------------------------------------------
-
--define(TEST_SOURCE, "
-#!/usr/bin/env escript
-
-%%%
-%%% Comment
-%%%
-
--define(FOO, 666).
-
-foo(N) -> % Shit!
-    ?FOO + 1.
-
-bar() ->
-    Y = 123, % Line 14
-    {ok, Y}.
-").
-
-tokenize_source_test() ->
-    tokenize_source(?TEST_SOURCE).
-
-take_tokens_block_test() ->
-    take_tokens_block(tokenize_source(?TEST_SOURCE), 14).
+symmetrical(Token) when is_tuple(Token) ->
+    symmetrical(category(Token));
+symmetrical(')') -> '(';
+symmetrical('}') -> '{';
+symmetrical(']') -> '['.
