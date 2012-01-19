@@ -1,7 +1,7 @@
 #!/usr/bin/env escript
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%-module(erlang_indent).
+-module(erlang_indent).
 %-compile(export_all).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
