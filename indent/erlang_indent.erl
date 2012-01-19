@@ -159,7 +159,6 @@ parse_generic2(_, State) ->
 
 next_relevant_token(Tokens) ->
     lists:dropwhile(fun(T) -> irrelevant_token(T) end, Tokens).
-    %lists:dropwhile(fun irrelevant_token/1, Tokens). % XXX: not in escript
 
 irrelevant_token(Token) ->
     %Chars = ['(', ')', '{', '}', '[', ']', '->', ',', ';', dot], % FIXME: Not handling well the comma
@@ -172,30 +171,3 @@ symmetrical(')')   -> '(';
 symmetrical('}')   -> '{';
 symmetrical(']')   -> '[';
 symmetrical(Token) -> symmetrical(category(Token)).
-
-%%% ----------------------------------------------------------------------------
-%%% Tests
-%%% ----------------------------------------------------------------------------
-
--define(TEST_SOURCE, "
-#!/usr/bin/env escript
-
-%%%
-%%% Comment
-%%%
-
--define(FOO, 666).
-
-foo(N) -> % Shit!
-    ?FOO + 1.
-
-bar() ->
-    Y = 123, % Line 14
-    {ok, Y}.
-").
-
-tokenize_source_test() ->
-    tokenize_source(?TEST_SOURCE).
-
-take_tokens_block_test() ->
-    take_tokens_block_before(tokenize_source(?TEST_SOURCE), 14).
