@@ -2,7 +2,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -module(erlang_indent).
-%-compile(export_all).
+-compile(export_all).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 -define(TOKEN_IS(Token, Cat), element(1, Token) == Cat).
