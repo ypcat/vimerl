@@ -2,7 +2,7 @@
 " Language: Erlang
 " Author:   Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 " License:  Vim license
-" Version:  2012/01/18
+" Version:  2012/01/19
 
 if exists('b:did_indent')
 	finish
@@ -20,13 +20,15 @@ endif
 let s:erlang_indent_file = expand('<sfile>:p:h') . '/erlang_indent.erl'
 
 function ErlangIndent()
-	" TODO: Faster with erl -noshell -run script main ... -run erlang halt
-	" TODO: Use system(cmd, input), getbufline() and join()
-	let indentation = split(system(s:erlang_indent_file . ' ' . expand('%') . ' ' . v:lnum))
-
-	if len(indentation) == 1
-		return indentation[0] * &shiftwidth
+	if v:lnum == 1
+		return 0
 	else
-		return indentation[1]
+		let code = join(getline(1, "."), "\n")
+		let indent = split(system(s:erlang_indent_file . ' ' . v:lnum, code))
+		if len(indent) == 1
+			return indent[0] * &shiftwidth
+		else
+			return indent[1]
+		endif
 	endif
 endfunction

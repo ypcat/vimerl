@@ -6,8 +6,9 @@
 
 -define(TOKEN_IS(Token, Cat), element(1, Token) == Cat).
 
-main([File, Line]) ->
-    case file_indentation(File, list_to_integer(Line)) of
+main([Line]) ->
+    Source = read_stdin(),
+    case source_indentation(Source, list_to_integer(Line)) of
         {Tab, Col} ->
             io:format("~B ~B~n", [Tab, Col]);
         Tab ->
@@ -15,6 +16,29 @@ main([File, Line]) ->
     end;
 main(_) ->
     'XXX'.
+
+read_stdin() ->
+    read_stdin([]).
+
+read_stdin(L) ->
+    case io:get_chars("", 4096) of
+        eof ->
+            lists:reverse(L);
+        Data ->
+            read_stdin([Data | L])
+    end.
+
+
+
+%main([File, Line]) ->
+    %case file_indentation(File, list_to_integer(Line)) of
+        %{Tab, Col} ->
+            %io:format("~B ~B~n", [Tab, Col]);
+        %Tab ->
+            %io:format("~B~n", [Tab])
+    %end;
+%main(_) ->
+    %'XXX'.
 
 %%% TODO TODO TODO
 %%% indent_file(File)
@@ -26,9 +50,9 @@ main(_) ->
 % TODO: usar string:strip() para quitar los espacios de una linea y luego indentarla
 % indent_file() ->
 
-file_indentation(File, Line) ->
+source_indentation(Source, Line) ->
     % FIXME: hacer el try-catch en indent_file/1,2,3
-    Tokens = tokenize_file(File),
+    Tokens = tokenize_source(Source),
     Tokens2 = take_tokens_block(Tokens, Line),
     % TODO: este retorna la indentacion, indent_file() lo indenta.
     indentation_after(Tokens2).
