@@ -19,12 +19,12 @@ endif
 
 let s:erlang_indent_file = expand('<sfile>:p:h') . '/erlang_indent.erl'
 
-" TODO: implementar el indenter para rangos
+" TODO: writefile(), readfile() funcionan sobre un FIFO con os:cmd/1, usar 2 FIFOs.
 function ErlangIndent()
 	if v:lnum == 1
 		return 0
 	else
-		let code = join(getline(1, "."), "\n")
+		let code = join(getline(1, v:lnum), '\n')
 		let indent = split(system(s:erlang_indent_file . ' ' . v:lnum, code))
 		if len(indent) == 1
 			return indent[0] * &shiftwidth

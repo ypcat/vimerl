@@ -101,10 +101,10 @@ indentation_between(PrevToks, NextToks) ->
     try
         {Tab, Col} = parse_tokens(PrevToks),
         case NextToks of
-            [] ->
-                {Tab, Col};
             [T | _] when ?TOKEN_IS(T, ')'); ?TOKEN_IS(T, '}'); ?TOKEN_IS(T, ']') ->
-                {Tab, Col - 1}
+                {Tab, Col - 1};
+            _ ->
+                {Tab, Col}
         end
     catch
         throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
