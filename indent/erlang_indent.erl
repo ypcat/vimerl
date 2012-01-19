@@ -1,8 +1,8 @@
-%#!/usr/bin/env escript
+#!/usr/bin/env escript
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--module(erlang_indent).
--compile(export_all).
+%-module(erlang_indent).
+%-compile(export_all).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 -define(TOKEN_IS(Token, Cat), element(1, Token) == Cat).
