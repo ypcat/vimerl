@@ -97,6 +97,8 @@ column(Token) ->
 
 -record(state, {stack = [], tabs = [0], cols = [none]}).
 
+indentation_between([], _) ->
+    {0, none};
 indentation_between(PrevToks, NextToks) ->
     try
         {Tab, Col} = parse_tokens(PrevToks),
