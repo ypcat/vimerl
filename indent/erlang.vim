@@ -19,6 +19,7 @@ endif
 
 let s:erlang_indent_file = expand('<sfile>:p:h') . '/erlang_indent.erl'
 
+" TODO: implementar el indenter para rangos
 function ErlangIndent()
 	if v:lnum == 1
 		return 0
