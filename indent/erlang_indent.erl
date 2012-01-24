@@ -1,8 +1,9 @@
 #!/usr/bin/env escript
 
--define(TOKEN_IS(T, C), element(1, T) == C).
+-define(TOKEN_IS(T, C), (element(1, T) == C)).
 -define(TOKEN_OPEN(T), ?TOKEN_IS(T, '('); ?TOKEN_IS(T, '{'); ?TOKEN_IS(T, '[')).
 -define(TOKEN_CLOSE(T), ?TOKEN_IS(T, ')'); ?TOKEN_IS(T, '}'); ?TOKEN_IS(T, ']')).
+-define(TOKEN_NOT_OPEN(T), not ?TOKEN_IS(T, '('), not ?TOKEN_IS(T, '{'), not ?TOKEN_IS(T, '[')).
 
 main([Line, File]) ->
     Source = read_file(File),
@@ -114,6 +115,27 @@ parse_function([T = {atom, _, _} | Tokens], State = #state{stack = []}) ->
 parse_function(_, State) ->
     throw({parse_error, State}).
 
+parse_generic(Tokens, State) ->
+    parse_generic2(next_relevant_token(Tokens), State).
+
+parse_generic2([T | Tokens], State) when ?TOKEN_OPEN(T) ->
+    parse_generic(Tokens, push(State, T, 0, column(T)));
+parse_generic2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?TOKEN_CLOSE(T1) ->
+    case symmetrical(T1) == category(T2) of
+        true ->
+            parse_generic(Tokens, pop(State));
+        false ->
+            throw({parse_error, State})
+    end;
+parse_generic2([{';', _} | Tokens], State = #state{stack = [T | _]}) when ?TOKEN_NOT_OPEN(T) ->
+    parse_generic(Tokens, pop(State));
+parse_generic2([{dot, _} | Tokens], State = #state{stack = [T]}) when ?TOKEN_IS(T, '-'); ?TOKEN_IS(T, atom) ->
+    parse_generic(Tokens, pop(State));
+parse_generic2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
+    {Tab, Col};
+parse_generic2(_, State) ->
+    throw({parse_error, State}).
+
 indent(State, OffTab, Col) ->
     Tabs = State#state.tabs,
     Cols = State#state.cols,
@@ -131,30 +153,10 @@ push(State = #state{stack = Stack}, Token, OffTab, Col) ->
 pop(State = #state{stack = Stack}) ->
     unindent(State#state{stack = tl(Stack)}).
 
-parse_generic(Tokens, State) ->
-    parse_generic2(next_relevant_token(Tokens), State).
-
-parse_generic2([T | Tokens], State) when ?TOKEN_OPEN(T) ->
-    parse_generic(Tokens, push(State, T, 0, column(T)));
-parse_generic2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?TOKEN_CLOSE(T1) ->
-    case symmetrical(T1) == category(T2) of
-        true ->
-            parse_generic(Tokens, pop(State));
-        false ->
-            throw({parse_error, State})
-    end;
-parse_generic2([{dot, _}], #state{stack = [T]}) when ?TOKEN_IS(T, '-'); ?TOKEN_IS(T, atom) ->
-    {0, 0};
-parse_generic2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
-    {Tab, Col};
-parse_generic2(_, State) ->
-    throw({parse_error, State}).
-
 next_relevant_token(Tokens) ->
     lists:dropwhile(fun(T) -> irrelevant_token(T) end, Tokens).
 
 irrelevant_token(Token) ->
-    %Chars = ['(', ')', '{', '}', '[', ']', '->', ',', ';', dot], % FIXME: Not handling well the comma
     Chars = ['(', ')', '{', '}', '[', ']', '->', ';', dot],
     Keywords = ['when', 'receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Cat = category(Token),
