@@ -5,6 +5,8 @@
 -define(TOKEN_CLOSE(T), ?TOKEN_IS(T, ')'); ?TOKEN_IS(T, '}'); ?TOKEN_IS(T, ']')).
 -define(TOKEN_NOT_OPEN(T), not ?TOKEN_IS(T, '('), not ?TOKEN_IS(T, '{'), not ?TOKEN_IS(T, '[')).
 
+-record(state, {stack = [], tabs = [0], cols = [none]}).
+
 main([Line, File]) ->
     Source = read_file(File),
     format_indentation(source_indentation(Source, list_to_integer(Line)));
@@ -75,10 +77,6 @@ column(Token) ->
     {column, Col} = erl_scan:token_info(Token, column),
     Col.
 
-%%% TODO -----------------------------------------------------------------------
-
--record(state, {stack = [], tabs = [0], cols = [none]}).
-
 indentation_between([], _) ->
     {0, none};
 indentation_between(PrevToks, NextToks) ->
@@ -127,9 +125,11 @@ parse_generic2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?TOKEN_CLOS
         false ->
             throw({parse_error, State})
     end;
+parse_generic2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?TOKEN_IS(T2, atom) ->
+    parse_generic(Tokens, push(pop(State), T1, 1));
 parse_generic2([{';', _} | Tokens], State = #state{stack = [T | _]}) when ?TOKEN_NOT_OPEN(T) ->
     parse_generic(Tokens, pop(State));
-parse_generic2([{dot, _} | Tokens], State = #state{stack = [T]}) when ?TOKEN_IS(T, '-'); ?TOKEN_IS(T, atom) ->
+parse_generic2([{dot, _} | Tokens], State = #state{stack = [T]}) when ?TOKEN_IS(T, '-'); ?TOKEN_IS(T, '->') ->
     parse_generic(Tokens, pop(State));
 parse_generic2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
     {Tab, Col};
