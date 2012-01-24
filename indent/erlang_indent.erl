@@ -93,7 +93,7 @@ indentation_between(PrevToks, NextToks) ->
         end
     catch
         throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
-            io:format("Parse error~n"), % XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
+            io:format("Error: parse_error thrown~n"), % XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX: Remove
             {hd(Tabs), hd(Cols)}
     end.
 
@@ -114,19 +114,19 @@ parse_function([T = {atom, _, _} | Tokens], State = #state{stack = []}) ->
 parse_function(_, State) ->
     throw({parse_error, State}).
 
-indent(State, IncTab, Col) ->
+indent(State, OffTab, Col) ->
     Tabs = State#state.tabs,
     Cols = State#state.cols,
-    State#state{tabs = [hd(Tabs) + IncTab | Tabs], cols = [Col | Cols]}.
+    State#state{tabs = [hd(Tabs) + OffTab | Tabs], cols = [Col | Cols]}.
 
 unindent(State = #state{tabs = Tabs, cols = Cols}) ->
     State#state{tabs = tl(Tabs), cols = tl(Cols)}.
 
-push(State, Token, Tab) ->
-    push(State, Token, Tab, none).
+push(State, Token, OffTab) ->
+    push(State, Token, OffTab, none).
 
-push(State = #state{stack = Stack}, Token, Tab, Col) ->
-    indent(State#state{stack = [Token | Stack]}, Tab, Col).
+push(State = #state{stack = Stack}, Token, OffTab, Col) ->
+    indent(State#state{stack = [Token | Stack]}, OffTab, Col).
 
 pop(State = #state{stack = Stack}) ->
     unindent(State#state{stack = tl(Stack)}).
