@@ -1,13 +1,9 @@
 #!/usr/bin/env escript
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FIXME
--module(erlang_indent).
--compile(export_all).
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FIXME
+-define(TOKEN_IS(T, C), element(1, T) == C).
+-define(TOKEN_OPEN(T), ?TOKEN_IS(T, '('); ?TOKEN_IS(T, '{'); ?TOKEN_IS(T, '[')).
+-define(TOKEN_CLOSE(T), ?TOKEN_IS(T, ')'); ?TOKEN_IS(T, '}'); ?TOKEN_IS(T, ']')).
 
--define(TOKEN_IS(Token, Cat), element(1, Token) == Cat).
-
-%% TODO: Handle thrown exceptions
 main([Line, File]) ->
     Source = read_file(File),
     format_indentation(source_indentation(Source, list_to_integer(Line)));
@@ -18,12 +14,8 @@ main(_) ->
     bad_opts.
 
 read_file(File) ->
-    case file:read_file(File) of
-        {ok, Bin} ->
-            binary_to_list(Bin);
-        Error ->
-            throw(Error)
-    end.
+    {ok, Bin} = file:read_file(File),
+    binary_to_list(Bin).
 
 read_stdin() ->
     read_stdin([]).
@@ -53,8 +45,8 @@ tokenize_source2(Source) ->
     case erl_scan:string(Source, {1, 1}) of
         {ok, Tokens, _} ->
             Tokens;
-        Error ->
-            throw(Error)
+        {error, _, _} ->
+            []
     end.
 
 eat_shebang([{'#', {N, _}}, {'!', {N, _}} | Tokens]) ->
@@ -94,7 +86,7 @@ indentation_between(PrevToks, NextToks) ->
         case NextToks of
             _ when Col == none ->
                 {Tab, Col};
-            [T | _] when ?TOKEN_IS(T, ')'); ?TOKEN_IS(T, '}'); ?TOKEN_IS(T, ']') ->
+            [T | _] when ?TOKEN_CLOSE(T) ->
                 {Tab, Col - 1};
             _ ->
                 {Tab, Col}
@@ -142,9 +134,9 @@ pop(State = #state{stack = Stack}) ->
 parse_generic(Tokens, State) ->
     parse_generic2(next_relevant_token(Tokens), State).
 
-parse_generic2([T | Tokens], State) when ?TOKEN_IS(T, '('); ?TOKEN_IS(T, '{'); ?TOKEN_IS(T, '[') ->
+parse_generic2([T | Tokens], State) when ?TOKEN_OPEN(T) ->
     parse_generic(Tokens, push(State, T, 0, column(T)));
-parse_generic2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?TOKEN_IS(T1, ')'); ?TOKEN_IS(T1, '}'); ?TOKEN_IS(T1, ']') ->
+parse_generic2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?TOKEN_CLOSE(T1) ->
     case symmetrical(T1) == category(T2) of
         true ->
             parse_generic(Tokens, pop(State));
