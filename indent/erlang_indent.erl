@@ -7,17 +7,6 @@
 
 -define(TOKEN_IS(Token, Cat), element(1, Token) == Cat).
 
-%%% TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-%%% TODO: hacer una rutina que retorne el estado del parser para indentar varias lineas
-%%%
-%%% indent_file(File)
-%%% indent_file(File, Start, End)
-%%%
-%%% Hacer tambien rutinas para que muestre el fichero indentado
-%%%
-%%% TODO: usar string:strip() para quitar los espacios de una linea y luego indentarla
-%%% TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-
 %% TODO: Handle thrown exceptions
 main([Line, File]) ->
     Source = read_file(File),

@@ -25,7 +25,7 @@ function ErlangIndent()
 	if v:lnum == 1
 		return 0
 	else
-		let code = join(getline(1, v:lnum), '\n')
+		let code = join(getline(1, v:lnum), "\n")
 		let indent = split(system(s:erlang_indent_file . ' ' . v:lnum, code))
 		if len(indent) == 1
 			return indent[0] * &shiftwidth
