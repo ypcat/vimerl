@@ -3,7 +3,6 @@
 -define(IS(T, C), (element(1, T) == C)).
 -define(OPEN_BRACKET(T), ?IS(T, '('); ?IS(T, '{'); ?IS(T, '[')).
 -define(CLOSE_BRACKET(T), ?IS(T, ')'); ?IS(T, '}'); ?IS(T, ']')).
--define(NOT_OPEN_BRACKET(T), not ?IS(T, '('), not ?IS(T, '{'), not ?IS(T, '[')).
 
 -record(state, {stack = [], tabs = [0], cols = [none]}).
 
@@ -127,8 +126,10 @@ parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET
     end;
 parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?IS(T2, atom) ->
     parse_next(Tokens, push(pop(State), T1, 1));
-parse_next2([{';', _} | Tokens], State = #state{stack = [T | _]}) when ?NOT_OPEN_BRACKET(T) ->
-    parse_next(Tokens, pop(State));
+parse_next2([{';', _} | Tokens], State = #state{stack = [T | _]}) when ?IS(T, '->') ->
+    parse_function(Tokens, pop(State));
+parse_next2([{';', _} | Tokens], State) ->
+    parse_next(Tokens, State);
 parse_next2([{dot, _} | Tokens], State = #state{stack = [T]}) when ?IS(T, '-'); ?IS(T, '->') ->
     parse_next(Tokens, pop(State));
 parse_next2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
@@ -157,7 +158,7 @@ next_relevant_token(Tokens) ->
     lists:dropwhile(fun(T) -> irrelevant_token(T) end, Tokens).
 
 irrelevant_token(Token) ->
-    Chars = ['(', ')', '{', '}', '[', ']', '->', ';', dot],
+    Chars = ['(', ')', '{', '}', '[', ']', '->', ';', dot], % TODO: Add `,'
     Keywords = ['receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
