@@ -1,9 +1,9 @@
 #!/usr/bin/env escript
 
--define(TOKEN_IS(T, C), (element(1, T) == C)).
--define(TOKEN_OPEN(T), ?TOKEN_IS(T, '('); ?TOKEN_IS(T, '{'); ?TOKEN_IS(T, '[')).
--define(TOKEN_CLOSE(T), ?TOKEN_IS(T, ')'); ?TOKEN_IS(T, '}'); ?TOKEN_IS(T, ']')).
--define(TOKEN_NOT_OPEN(T), not ?TOKEN_IS(T, '('), not ?TOKEN_IS(T, '{'), not ?TOKEN_IS(T, '[')).
+-define(IS(T, C), (element(1, T) == C)).
+-define(OPEN_BRACKET(T), ?IS(T, '('); ?IS(T, '{'); ?IS(T, '[')).
+-define(CLOSE_BRACKET(T), ?IS(T, ')'); ?IS(T, '}'); ?IS(T, ']')).
+-define(NOT_OPEN_BRACKET(T), not ?IS(T, '('), not ?IS(T, '{'), not ?IS(T, '[')).
 
 -record(state, {stack = [], tabs = [0], cols = [none]}).
 
@@ -85,7 +85,7 @@ indentation_between(PrevToks, NextToks) ->
         case NextToks of
             _ when Col == none ->
                 {Tab, Col};
-            [T | _] when ?TOKEN_CLOSE(T) ->
+            [T | _] when ?CLOSE_BRACKET(T) ->
                 {Tab, Col - 1};
             _ ->
                 {Tab, Col}
@@ -104,36 +104,36 @@ parse_tokens(_) ->
     throw({parse_error, #state{}}).
 
 parse_attribute([T = {'-', _} | Tokens], State = #state{stack = []}) ->
-    parse_generic(Tokens, push(State, T, 0));
+    parse_next(Tokens, push(State, T, 0));
 parse_attribute(_, State) ->
     throw({parse_error, State}).
 
 parse_function([T = {atom, _, _} | Tokens], State = #state{stack = []}) ->
-    parse_generic(Tokens, push(State, T, 2));
+    parse_next(Tokens, push(State, T, 2));
 parse_function(_, State) ->
     throw({parse_error, State}).
 
-parse_generic(Tokens, State) ->
-    parse_generic2(next_relevant_token(Tokens), State).
+parse_next(Tokens, State) ->
+    parse_next2(next_relevant_token(Tokens), State).
 
-parse_generic2([T | Tokens], State) when ?TOKEN_OPEN(T) ->
-    parse_generic(Tokens, push(State, T, 0, column(T)));
-parse_generic2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?TOKEN_CLOSE(T1) ->
+parse_next2([T | Tokens], State) when ?OPEN_BRACKET(T) ->
+    parse_next(Tokens, push(State, T, 0, column(T)));
+parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET(T1) ->
     case symmetrical(T1) == category(T2) of
         true ->
-            parse_generic(Tokens, pop(State));
+            parse_next(Tokens, pop(State));
         false ->
             throw({parse_error, State})
     end;
-parse_generic2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?TOKEN_IS(T2, atom) ->
-    parse_generic(Tokens, push(pop(State), T1, 1));
-parse_generic2([{';', _} | Tokens], State = #state{stack = [T | _]}) when ?TOKEN_NOT_OPEN(T) ->
-    parse_generic(Tokens, pop(State));
-parse_generic2([{dot, _} | Tokens], State = #state{stack = [T]}) when ?TOKEN_IS(T, '-'); ?TOKEN_IS(T, '->') ->
-    parse_generic(Tokens, pop(State));
-parse_generic2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
+parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?IS(T2, atom) ->
+    parse_next(Tokens, push(pop(State), T1, 1));
+parse_next2([{';', _} | Tokens], State = #state{stack = [T | _]}) when ?NOT_OPEN_BRACKET(T) ->
+    parse_next(Tokens, pop(State));
+parse_next2([{dot, _} | Tokens], State = #state{stack = [T]}) when ?IS(T, '-'); ?IS(T, '->') ->
+    parse_next(Tokens, pop(State));
+parse_next2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
     {Tab, Col};
-parse_generic2(_, State) ->
+parse_next2(_, State) ->
     throw({parse_error, State}).
 
 indent(State, OffTab, Col) ->
