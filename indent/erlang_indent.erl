@@ -4,6 +4,7 @@
 %%% TODO: Handle `fun'
 %%% TODO: Handle split expression without the `,', use indent_next_token()?
 %%% TODO: Handle -spec
+%%% TODO: Handle `after' in the receive and the try
 %%% ----------------------------------------------------------------------------
 
 -record(state, {stack = [], tabs = [0], cols = [none]}).
@@ -84,6 +85,8 @@ column(Token) ->
     {column, Col} = erl_scan:token_info(Token, column),
     Col.
 
+%% TODO: A lo mejor hay que retornar el State y que esta
+%%       funcion lo trate.
 indentation_between([], _) ->
     {0, none};
 indentation_between(PrevToks, NextToks) ->
