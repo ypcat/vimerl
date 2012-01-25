@@ -27,6 +27,9 @@ if !exists('g:erlang_folding')
 	let g:erlang_folding = 0
 endif
 
+let s:erlang_fun_begin = '^\a\w*(.*$'
+let s:erlang_fun_end   = '^[^%]*\.\s*\(%.*\)\?$'
+
 function s:SetErlangOptions()
 	compiler erlang
 	if version >= 700
@@ -46,40 +49,35 @@ function s:SetErlangOptions()
 	let &l:keywordprg = g:erlang_keywordprg
 endfunction
 
-if !exists('*GetErlangFold')
-	let s:erlang_fun_begin  = '^\a\w*(.*$'
-	let s:erlang_fun_end    = '^[^%]*\.\s*\(%.*\)\?$'
+function GetErlangFold(lnum)
+	let lnum = a:lnum
+	let line = getline(lnum)
 
-	function GetErlangFold(lnum)
-		let lnum = a:lnum
-		let line = getline(lnum)
+	if line =~ s:erlang_fun_end
+		return '<1'
+	endif
 
-		if line =~ s:erlang_fun_end
-			return '<1'
-		endif
+	if line =~ s:erlang_fun_begin && foldlevel(lnum - 1) == 1
+		return '1'
+	endif
 
-		if line =~ s:erlang_fun_begin && foldlevel(lnum - 1) == 1
-			return '1'
-		endif
+	if line =~ s:erlang_fun_begin
+		return '>1'
+	endif
 
-		if line =~ s:erlang_fun_begin
-			return '>1'
-		endif
+	return '='
+endfunction
 
-		return '='
-	endfunction
+function ErlangFoldText()
+	let line    = getline(v:foldstart)
+	let foldlen = v:foldend - v:foldstart + 1
+	let lines   = ' ' . foldlen . ' lines: ' . substitute(line, "[\ \t]*", '', '')
+	if foldlen < 10
+		let lines = ' ' . lines
+	endif
+	let retval = '+' . v:folddashes . lines
 
-	function ErlangFoldText()
-		let line = getline(v:foldstart)
-		let foldlen = v:foldend - v:foldstart + 1
-		let lines = ' ' . foldlen . ' lines: ' . substitute(line, "[\ \t]*", '', '')
-		if foldlen < 10
-			let lines = ' ' . lines
-		endif
-		let retval = '+' . v:folddashes . lines
-
-		return retval
-	endfunction
-endif
+	return retval
+endfunction
 
 call s:SetErlangOptions()
