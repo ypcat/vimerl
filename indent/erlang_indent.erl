@@ -1,5 +1,7 @@
 #!/usr/bin/env escript
 
+-mode(compile).
+
 -record(state, {stack = [], tabs = [0], cols = [none]}).
 
 -define(IS(T, C), (element(1, T) == C)).
@@ -7,34 +9,31 @@
 -define(CLOSE_BRACKET(T), ?IS(T, ')'); ?IS(T, '}'); ?IS(T, ']'); ?IS(T, '>>')).
 -define(BRANCH_EXPR(T), ?IS(T, 'fun'); ?IS(T, 'receive'); ?IS(T, 'if'); ?IS(T, 'case'); ?IS(T, 'try')).
 
-main([Line, File]) ->
+main(["-f", File, Line]) ->
     Source = read_file(File),
-    format_indentation(source_indentation(Source, list_to_integer(Line)));
-main([Line]) ->
-    Source = read_stdin(),
-    format_indentation(source_indentation(Source, list_to_integer(Line)));
+    Indent = format_indentation(source_indentation(Source, list_to_integer(Line))),
+    io:format("~s~n", [Indent]);
+main([InFifo, OutFifo]) ->
+    {ok, [Line], [$\n | Source]} = io_lib:fread("~d", read_fifo(InFifo)),
+    Indent = format_indentation(source_indentation(Source, Line)),
+    write_fifo(OutFifo, lists:flatten(Indent));
 main(_) ->
     bad_opts.
+
+read_fifo(Fifo) ->
+    os:cmd("cat " ++ Fifo).
+
+write_fifo(Fifo, Str) ->
+    os:cmd("echo " ++ Str ++ " > " ++ Fifo).
 
 read_file(File) ->
     {ok, Bin} = file:read_file(File),
     binary_to_list(Bin).
 
-read_stdin() ->
-    read_stdin([]).
-
-read_stdin(L) ->
-    case io:get_chars("", 4096) of
-        eof ->
-            lists:flatten(lists:reverse(L));
-        Data ->
-            read_stdin([Data | L])
-    end.
-
 format_indentation({Tab, none}) ->
-    io:format("~B~n", [Tab]);
+    io_lib:format("~B", [Tab]);
 format_indentation({Tab, Col}) ->
-    io:format("~B ~B~n", [Tab, Col]).
+    io_lib:format("~B ~B", [Tab, Col]).
 
 source_indentation(Source, Line) ->
     Tokens = tokenize_source(Source),
