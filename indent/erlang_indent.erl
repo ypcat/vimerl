@@ -92,6 +92,8 @@ indentation_between(PrevToks, NextToks) ->
                 case Col of
                     none ->
                         {Tab, Col};
+                    _ when ?IS(T, '>>') ->
+                        {Tab, Col - 2};
                     _ ->
                         {Tab, Col - 1}
                 end;
