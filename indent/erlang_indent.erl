@@ -3,8 +3,6 @@
 %%% ----------------------------------------------------------------------------
 %%% TODO: Handle `fun'
 %%% TODO: Handle split expression without the `,', use indent_next_token()?
-%%% TODO: Handle -spec
-%%% TODO: Handle `after' in the receive and the try
 %%% ----------------------------------------------------------------------------
 
 -record(state, {stack = [], tabs = [0], cols = [none]}).
@@ -13,7 +11,6 @@
 -define(OPEN_BRACKET(T), ?IS(T, '('); ?IS(T, '{'); ?IS(T, '[')).
 -define(CLOSE_BRACKET(T), ?IS(T, ')'); ?IS(T, '}'); ?IS(T, ']')).
 -define(BRANCH_EXPR(T), ?IS(T, 'receive'); ?IS(T, 'if'); ?IS(T, 'case'); ?IS(T, 'try')).
--define(END_BRANCH_EXPR(T), ?IS(T, 'catch'); ?IS(T, 'after'); ?IS(T, 'end')). % FIXME: meter aqui el 'end' con los demas?
 
 main([Line, File]) ->
     Source = read_file(File),
@@ -85,26 +82,30 @@ column(Token) ->
     {column, Col} = erl_scan:token_info(Token, column),
     Col.
 
-%% TODO: A lo mejor hay que retornar el State y que esta
-%%       funcion lo trate.
 indentation_between([], _) ->
     {0, none};
 indentation_between(PrevToks, NextToks) ->
     try
-        {Tab, Col} = parse_tokens(PrevToks),
-        case NextToks of
-            [T | _] when ?CLOSE_BRACKET(T) ->
+        State = parse_tokens(PrevToks),
+        #state{tabs = [Tab | _], cols = [Col | _]} = State,
+        case {State#state.stack, NextToks} of
+            {_, [T | _]} when ?CLOSE_BRACKET(T) ->
                 case Col of
                     none ->
                         {Tab, Col};
                     _ ->
                         {Tab, Col - 1}
                 end;
-            [T | _] when ?IS(T, 'of') ->
+            {[{'try', _} | _], [T | _]} when ?IS(T, 'catch'); ?IS(T, 'after') ->
                 {Tab - 1, none};
-            % FIXME: el 'end' no lleva la misma indentacion que el resto
-            [T | _] when ?END_BRANCH_EXPR(T) ->
+            {[{'->', _} | _], [T | _]} when ?IS(T, 'catch'); ?IS(T, 'after') ->
                 {Tab - 2, none};
+            {[T1 | _], [T2 | _]} when ?IS(T1, 'try'), ?IS(T2, 'end') ->
+                {Tab - 1, none};
+            {[T1 | _], [T2 | _]} when ?IS(T1, '->'), ?IS(T2, 'end') ->
+                {Tab - 2, none};
+            {_, [T | _]} when ?IS(T, 'of') ->
+                {Tab - 1, none};
             _ ->
                 {Tab, Col}
         end
@@ -122,7 +123,7 @@ parse_tokens(_) ->
     throw({parse_error, #state{}}).
 
 parse_attribute([T = {'-', _} | Tokens], State = #state{stack = []}) ->
-    parse_next(Tokens, push(State, T, 0));
+    parse_next(Tokens, push(State, T, 2));
 parse_attribute(_, State) ->
     throw({parse_error, State}).
 
@@ -137,13 +138,13 @@ parse_next(Tokens, State) ->
 parse_next2([T | Tokens], State) when ?OPEN_BRACKET(T) ->
     parse_next(Tokens, push(State, T, 0, column(T)));
 parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET(T1) ->
-    case symmetrical(T1) == category(T2) of
+    case symmetrical(category(T1)) == category(T2) of
         true ->
             parse_next(Tokens, pop(State));
         false ->
             throw({parse_error, State})
     end;
-parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?IS(T2, atom) ->
+parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?IS(T2, '-'); ?IS(T2, atom) ->
     parse_next(Tokens, push(State, T1, -1));
 parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2 | _]}) when ?BRANCH_EXPR(T2) ->
     parse_next(Tokens, push(State, T1, 1));
@@ -155,18 +156,20 @@ parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(
     parse_next(Tokens, pop(State));
 parse_next2([{';', _} | Tokens], State) ->
     parse_next(Tokens, State);
-
-%% FIXME: El 'end' de abajo es el que hace pop(pop(...))
-parse_next2([T | Tokens], State = #state{stack = [{'->', _} | _]}) when ?END_BRANCH_EXPR(T) ->
+parse_next2([T | Tokens], State = #state{stack = [{'try', _} | _]}) when ?IS(T, 'catch'); ?IS(T, 'after') ->
+    parse_next(Tokens, State);
+parse_next2([T | Tokens], State = #state{stack = [{'->', _} | _]}) when ?IS(T, 'catch'); ?IS(T, 'after') ->
     parse_next(Tokens, pop(State));
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-parse_next2([{'end', _} | Tokens], State = #state{stack = [T | _]}) when ?IS(T, '->') ->
+parse_next2([{'end', _} | Tokens], State = #state{stack = [{'try', _} | _]}) ->
+    parse_next(Tokens, pop(State));
+parse_next2([{'end', _} | Tokens], State = #state{stack = [{'->', _} | _]}) ->
     parse_next(Tokens, pop(pop(State)));
-parse_next2([{dot, _} | Tokens], State = #state{stack = [T]}) when ?IS(T, '-'); ?IS(T, '->') ->
+parse_next2([{dot, _} | Tokens], State = #state{stack = [T]}) when ?IS(T, '-') ->
+    parse_next(Tokens, pop(State));
+parse_next2([{dot, _} | Tokens], State = #state{stack = [T, _]}) when ?IS(T, '->') ->
     parse_next(Tokens, pop(pop(State)));
-parse_next2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
-    {Tab, Col};
+parse_next2([], State) ->
+    State;
 parse_next2(_, State) ->
     throw({parse_error, State}).
 
@@ -196,8 +199,6 @@ irrelevant_token(Token) ->
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
 
-symmetrical(Token) when is_tuple(Token) ->
-    symmetrical(category(Token));
 symmetrical(')') -> '(';
 symmetrical('}') -> '{';
 symmetrical(']') -> '['.
