@@ -8,8 +8,8 @@
 -record(state, {stack = [], tabs = [0], cols = [none]}).
 
 -define(IS(T, C), (element(1, T) == C)).
--define(OPEN_BRACKET(T), ?IS(T, '('); ?IS(T, '{'); ?IS(T, '[')).
--define(CLOSE_BRACKET(T), ?IS(T, ')'); ?IS(T, '}'); ?IS(T, ']')).
+-define(OPEN_BRACKET(T), ?IS(T, '('); ?IS(T, '{'); ?IS(T, '['); ?IS(T, '<<')).
+-define(CLOSE_BRACKET(T), ?IS(T, ')'); ?IS(T, '}'); ?IS(T, ']'); ?IS(T, '>>')).
 -define(BRANCH_EXPR(T), ?IS(T, 'receive'); ?IS(T, 'if'); ?IS(T, 'case'); ?IS(T, 'try')).
 
 main([Line, File]) ->
@@ -135,6 +135,8 @@ parse_function(_, State) ->
 parse_next(Tokens, State) ->
     parse_next2(next_relevant_token(Tokens), State).
 
+parse_next2([T | Tokens], State) when ?IS(T, '<<') ->
+    parse_next(Tokens, push(State, T, 0, column(T) + 1));
 parse_next2([T | Tokens], State) when ?OPEN_BRACKET(T) ->
     parse_next(Tokens, push(State, T, 0, column(T)));
 parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET(T1) ->
@@ -194,11 +196,12 @@ next_relevant_token(Tokens) ->
     lists:dropwhile(fun(T) -> irrelevant_token(T) end, Tokens).
 
 irrelevant_token(Token) ->
-    Chars = ['(', ')', '{', '}', '[', ']', '->', ';', dot],
+    Chars = ['(', ')', '{', '}', '[', ']', '<<', '>>', '->', ';', dot],
     Keywords = ['receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
 
-symmetrical(')') -> '(';
-symmetrical('}') -> '{';
-symmetrical(']') -> '['.
+symmetrical(')')  -> '(';
+symmetrical('}')  -> '{';
+symmetrical(']')  -> '[';
+symmetrical('>>') -> '<<'.
