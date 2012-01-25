@@ -1,10 +1,10 @@
 #!/usr/bin/env escript
 
+-record(state, {stack = [], tabs = [0], cols = [none]}).
+
 -define(IS(T, C), (element(1, T) == C)).
 -define(OPEN_BRACKET(T), ?IS(T, '('); ?IS(T, '{'); ?IS(T, '[')).
 -define(CLOSE_BRACKET(T), ?IS(T, ')'); ?IS(T, '}'); ?IS(T, ']')).
-
--record(state, {stack = [], tabs = [0], cols = [none]}).
 
 main([Line, File]) ->
     Source = read_file(File),
@@ -82,10 +82,17 @@ indentation_between(PrevToks, NextToks) ->
     try
         {Tab, Col} = parse_tokens(PrevToks),
         case NextToks of
-            _ when Col == none ->
-                {Tab, Col};
             [T | _] when ?CLOSE_BRACKET(T) ->
-                {Tab, Col - 1};
+                case Col of
+                    none ->
+                        {Tab, Col};
+                    _ ->
+                        {Tab, Col - 1}
+                end;
+            [T | _] when ?IS(T, 'of') ->
+                {Tab - 1, none};
+            [T | _] when ?IS(T, 'end') ->
+                {Tab - 2, none};
             _ ->
                 {Tab, Col}
         end
@@ -125,13 +132,21 @@ parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET
             throw({parse_error, State})
     end;
 parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?IS(T2, atom) ->
-    parse_next(Tokens, push(pop(State), T1, 1));
-parse_next2([{';', _} | Tokens], State = #state{stack = [T | _]}) when ?IS(T, '->') ->
-    parse_function(Tokens, pop(State));
+    parse_next(Tokens, push(State, T1, -1));
+parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2 | _]}) when ?IS(T2, 'try') ->
+    parse_next(Tokens, push(State, T1, 1));
+parse_next2([T = {'try', _} | Tokens], State) ->
+    parse_next(Tokens, push(State, T, 1));
+parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(T1, '->'), ?IS(T2, atom) ->
+    parse_function(Tokens, pop(pop(State)));
+parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(T1, '->'), ?IS(T2, 'try') ->
+    parse_next(Tokens, pop(State));
 parse_next2([{';', _} | Tokens], State) ->
     parse_next(Tokens, State);
+parse_next2([{'end', _} | Tokens], State = #state{stack = [T | _]}) when ?IS(T, '->') ->
+    parse_next(Tokens, pop(pop(State)));
 parse_next2([{dot, _} | Tokens], State = #state{stack = [T]}) when ?IS(T, '-'); ?IS(T, '->') ->
-    parse_next(Tokens, pop(State));
+    parse_next(Tokens, pop(pop(State)));
 parse_next2([], #state{tabs = [Tab | _], cols = [Col | _]}) ->
     {Tab, Col};
 parse_next2(_, State) ->
@@ -158,7 +173,7 @@ next_relevant_token(Tokens) ->
     lists:dropwhile(fun(T) -> irrelevant_token(T) end, Tokens).
 
 irrelevant_token(Token) ->
-    Chars = ['(', ')', '{', '}', '[', ']', '->', ';', dot], % TODO: Add `,'
+    Chars = ['(', ')', '{', '}', '[', ']', '->', ';', dot], % TODO: Handle `,'
     Keywords = ['receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
