@@ -5,6 +5,7 @@
 -define(IS(T, C), (element(1, T) == C)).
 -define(OPEN_BRACKET(T), ?IS(T, '('); ?IS(T, '{'); ?IS(T, '[')).
 -define(CLOSE_BRACKET(T), ?IS(T, ')'); ?IS(T, '}'); ?IS(T, ']')).
+-define(BRANCH_EXPR(T), ?IS(T, 'receive'); ?IS(T, 'if'); ?IS(T, 'case'); ?IS(T, 'try')).
 
 main([Line, File]) ->
     Source = read_file(File),
@@ -133,13 +134,13 @@ parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET
     end;
 parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?IS(T2, atom) ->
     parse_next(Tokens, push(State, T1, -1));
-parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2 | _]}) when ?IS(T2, 'try') ->
+parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2 | _]}) when ?BRANCH_EXPR(T2) ->
     parse_next(Tokens, push(State, T1, 1));
-parse_next2([T = {'try', _} | Tokens], State) ->
+parse_next2([T | Tokens], State) when ?BRANCH_EXPR(T) ->
     parse_next(Tokens, push(State, T, 1));
 parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(T1, '->'), ?IS(T2, atom) ->
     parse_function(Tokens, pop(pop(State)));
-parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(T1, '->'), ?IS(T2, 'try') ->
+parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(T1, '->'), ?BRANCH_EXPR(T2) ->
     parse_next(Tokens, pop(State));
 parse_next2([{';', _} | Tokens], State) ->
     parse_next(Tokens, State);
@@ -174,7 +175,7 @@ next_relevant_token(Tokens) ->
 
 irrelevant_token(Token) ->
     Chars = ['(', ')', '{', '}', '[', ']', '->', ';', dot], % TODO: Handle `,'
-    Keywords = ['receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
+    Keywords = ['receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'], % TODO: Handle `fun'
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
 
