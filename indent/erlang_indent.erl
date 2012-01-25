@@ -18,7 +18,8 @@ main([InFifo, OutFifo]) ->
     Indent = format_indentation(source_indentation(Source, Line)),
     write_fifo(OutFifo, lists:flatten(Indent));
 main(_) ->
-    bad_opts.
+    io:format("Usage: ~s <in_fifo> <out_fifo> | -f <file> <line>~n", [escript:script_name()]),
+    halt(1).
 
 read_fifo(Fifo) ->
     os:cmd("cat " ++ Fifo).
