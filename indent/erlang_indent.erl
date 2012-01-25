@@ -1,11 +1,18 @@
 #!/usr/bin/env escript
 
+%%% ----------------------------------------------------------------------------
+%%% TODO: Handle `fun'
+%%% TODO: Handle split expression without the `,', use indent_next_token()?
+%%% TODO: Handle -spec
+%%% ----------------------------------------------------------------------------
+
 -record(state, {stack = [], tabs = [0], cols = [none]}).
 
 -define(IS(T, C), (element(1, T) == C)).
 -define(OPEN_BRACKET(T), ?IS(T, '('); ?IS(T, '{'); ?IS(T, '[')).
 -define(CLOSE_BRACKET(T), ?IS(T, ')'); ?IS(T, '}'); ?IS(T, ']')).
 -define(BRANCH_EXPR(T), ?IS(T, 'receive'); ?IS(T, 'if'); ?IS(T, 'case'); ?IS(T, 'try')).
+-define(END_BRANCH_EXPR(T), ?IS(T, 'catch'); ?IS(T, 'after'); ?IS(T, 'end')). % FIXME: meter aqui el 'end' con los demas?
 
 main([Line, File]) ->
     Source = read_file(File),
@@ -92,7 +99,8 @@ indentation_between(PrevToks, NextToks) ->
                 end;
             [T | _] when ?IS(T, 'of') ->
                 {Tab - 1, none};
-            [T | _] when ?IS(T, 'end') ->
+            % FIXME: el 'end' no lleva la misma indentacion que el resto
+            [T | _] when ?END_BRANCH_EXPR(T) ->
                 {Tab - 2, none};
             _ ->
                 {Tab, Col}
@@ -144,6 +152,12 @@ parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(
     parse_next(Tokens, pop(State));
 parse_next2([{';', _} | Tokens], State) ->
     parse_next(Tokens, State);
+
+%% FIXME: El 'end' de abajo es el que hace pop(pop(...))
+parse_next2([T | Tokens], State = #state{stack = [{'->', _} | _]}) when ?END_BRANCH_EXPR(T) ->
+    parse_next(Tokens, pop(State));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 parse_next2([{'end', _} | Tokens], State = #state{stack = [T | _]}) when ?IS(T, '->') ->
     parse_next(Tokens, pop(pop(State)));
 parse_next2([{dot, _} | Tokens], State = #state{stack = [T]}) when ?IS(T, '-'); ?IS(T, '->') ->
@@ -174,8 +188,8 @@ next_relevant_token(Tokens) ->
     lists:dropwhile(fun(T) -> irrelevant_token(T) end, Tokens).
 
 irrelevant_token(Token) ->
-    Chars = ['(', ')', '{', '}', '[', ']', '->', ';', dot], % TODO: Handle `,'
-    Keywords = ['receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'], % TODO: Handle `fun'
+    Chars = ['(', ')', '{', '}', '[', ']', '->', ';', dot],
+    Keywords = ['receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
 

@@ -21,6 +21,7 @@ let s:erlang_indent_file = expand('<sfile>:p:h') . '/erlang_indent.erl'
 
 " TODO: writefile(), readfile() funcionan sobre un FIFO con os:cmd("cat fifo"), usar 2 FIFOs.
 " TODO: optimizar y solo enviar desde la ultima linea que sea: ^\(-\)[a-z']
+" TODO: use for comments the indentation fo the prev-non-blank line
 function ErlangIndent()
 	if v:lnum == 1
 		return 0
