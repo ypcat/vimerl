@@ -1,9 +1,5 @@
 #!/usr/bin/env escript
 
-%%% ----------------------------------------------------------------------------
-%%% TODO: Handle split expression without the `,', use indent_next_token()?
-%%% ----------------------------------------------------------------------------
-
 -record(state, {stack = [], tabs = [0], cols = [none]}).
 
 -define(IS(T, C), (element(1, T) == C)).
@@ -112,7 +108,6 @@ indentation_between(PrevToks, NextToks) ->
         end
     catch
         throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
-            io:format("Error: parse_error thrown~n"), % XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX: Remove
             {hd(Tabs), hd(Cols)}
     end.
 
@@ -137,9 +132,9 @@ parse_next(Tokens, State) ->
     parse_next2(next_relevant_token(Tokens), State).
 
 parse_next2([T | Tokens], State) when ?IS(T, '<<') ->
-    parse_next(Tokens, push(State, T, 0, column(T) + 1));
+    parse_next(Tokens, push(State, T, 1, column(T) + 1));
 parse_next2([T | Tokens], State) when ?OPEN_BRACKET(T) ->
-    parse_next(Tokens, push(State, T, 0, column(T)));
+    parse_next(Tokens, push(State, T, 1, column(T)));
 parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET(T1) ->
     case symmetrical(category(T1)) == category(T2) of
         true ->
@@ -147,6 +142,16 @@ parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET
         false ->
             throw({parse_error, State})
     end;
+parse_next2([{'=', _} | Tokens], State = #state{stack = [T | _]}) when ?OPEN_BRACKET(T) ->
+    parse_next(Tokens, State);
+parse_next2([T1 = {'=', _} | Tokens], State = #state{stack = [T2 | _]}) when ?IS(T2, '=') ->
+    parse_next(Tokens, push(pop(State), T1, 1, column(T1) + 1));
+parse_next2([T = {'=', _} | Tokens], State) ->
+    parse_next(Tokens, push(State, T, 1, column(T) + 1));
+parse_next2([{',', _} | Tokens], State = #state{stack = [T | _]}) when ?IS(T, '=') ->
+    parse_next(Tokens, pop(State));
+parse_next2([{',', _} | Tokens], State) ->
+    parse_next(Tokens, State);
 parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?IS(T2, '-'); ?IS(T2, atom) ->
     parse_next(Tokens, push(State, T1, -1));
 parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2 | _]}) when ?BRANCH_EXPR(T2) ->
@@ -197,7 +202,7 @@ next_relevant_token(Tokens) ->
     lists:dropwhile(fun(T) -> irrelevant_token(T) end, Tokens).
 
 irrelevant_token(Token) ->
-    Chars = ['(', ')', '{', '}', '[', ']', '<<', '>>', '->', ';', dot],
+    Chars = ['(', ')', '{', '}', '[', ']', '<<', '>>', '=', '->', ',', ';', dot],
     Keywords = ['fun', 'receive', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
