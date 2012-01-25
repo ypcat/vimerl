@@ -130,19 +130,22 @@ if !exists('*GetErlangFold')
 
 	" Erlang fold description (foldtext function)
 	function ErlangFoldText()
-		let foldlen = v:foldend - v:foldstart
-		if 1 < foldlen
-			let lines = 'lines'
-		else
-			let lines = 'line'
-		endif
 		let line = getline(v:foldstart)
-		let name = s:GetFunName(line)
-		let arguments = s:GetFunArgs(strpart(line, strlen(name)), v:foldstart)
-		let argcount = s:CountFunArgs(arguments)
-		let retval = '+' . v:folddashes . ' ' . name . '/' . argcount
-		let retval .= ' (' . foldlen . ' ' . lines . ')'
+		let foldlen = v:foldend - v:foldstart + 1
+		let lines = ' ' . foldlen . ' lines: ' . substitute(line, "[\ \t]*", '', '')
+		if foldlen < 10
+			let lines = ' ' . lines
+		endif
+		let retval = '+' . v:folddashes . lines
+
 		return retval
+
+		"let name = s:GetFunName(line)
+		"let arguments = s:GetFunArgs(strpart(line, strlen(name)), v:foldstart)
+		"let argcount = s:CountFunArgs(arguments)
+		"let retval = '+' . v:folddashes . ' ' . name . '/' . argcount
+		"let retval .= ' (' . foldlen . ' ' . lines . ')'
+		"return retval
 	endfunction
 endif
 
