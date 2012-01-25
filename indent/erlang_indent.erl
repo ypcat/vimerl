@@ -1,7 +1,6 @@
 #!/usr/bin/env escript
 
 %%% ----------------------------------------------------------------------------
-%%% TODO: Handle `fun'
 %%% TODO: Handle split expression without the `,', use indent_next_token()?
 %%% ----------------------------------------------------------------------------
 
@@ -10,7 +9,7 @@
 -define(IS(T, C), (element(1, T) == C)).
 -define(OPEN_BRACKET(T), ?IS(T, '('); ?IS(T, '{'); ?IS(T, '['); ?IS(T, '<<')).
 -define(CLOSE_BRACKET(T), ?IS(T, ')'); ?IS(T, '}'); ?IS(T, ']'); ?IS(T, '>>')).
--define(BRANCH_EXPR(T), ?IS(T, 'receive'); ?IS(T, 'if'); ?IS(T, 'case'); ?IS(T, 'try')).
+-define(BRANCH_EXPR(T), ?IS(T, 'fun'); ?IS(T, 'receive'); ?IS(T, 'if'); ?IS(T, 'case'); ?IS(T, 'try')).
 
 main([Line, File]) ->
     Source = read_file(File),
