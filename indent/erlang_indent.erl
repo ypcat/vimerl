@@ -197,7 +197,7 @@ next_relevant_token(Tokens) ->
 
 irrelevant_token(Token) ->
     Chars = ['(', ')', '{', '}', '[', ']', '<<', '>>', '->', ';', dot],
-    Keywords = ['receive', 'fun', 'if', 'case', 'try', 'catch', 'after', 'end'],
+    Keywords = ['fun', 'receive', 'if', 'case', 'try', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
 

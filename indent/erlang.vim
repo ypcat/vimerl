@@ -11,7 +11,7 @@ else
 endif
 
 setlocal indentexpr=ErlangIndent()
-setlocal indentkeys=!^F,o,O,=of,=catch,=after,=end,=),=},=],=>>
+setlocal indentkeys=!^F,o,O,=),=},=],=>>,=of,=catch,=after,=end
 
 if exists('*ErlangIndent')
 	finish
