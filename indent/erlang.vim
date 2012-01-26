@@ -23,6 +23,7 @@ let s:out_fifo           = expand('<sfile>:p:h') . '/out_fifo.' . getpid()
 
 execute 'silent !mkfifo' s:in_fifo
 execute 'silent !mkfifo' s:out_fifo
+execute 'silent !' . s:erlang_indent_file s:out_fifo s:in_fifo '&'
 
 autocmd VimLeave * call <SID>StopIndenter()
 
@@ -32,20 +33,16 @@ function s:StopIndenter()
 	call delete(s:out_fifo)
 endfunction
 
-
-
-
-
-" TODO: poner en el .gitignore los FIFOs?
-" TODO: writefile(), readfile() funcionan sobre un FIFO con os:cmd("cat fifo"), usar 2 FIFOs.
-" TODO: optimizar y solo enviar desde la ultima linea que sea: ^\(-\)[a-z']
-" TODO: use for comments the indentation fo the NEXT-non-blank line
+" TODO: Put FIFOs file in the .gitignore?
+" TODO: Only send to the indenter from function/attribute start.
+" TODO: Indent comments as the next-non-blank line.
 function ErlangIndent()
 	if v:lnum == 1
 		return 0
 	else
-		let code = join(getline(1, v:lnum), "\n")
-		let indent = split(system(s:erlang_indent_file . ' ' . v:lnum, code))
+		call writefile([v:lnum] + getline(1, v:lnum), s:out_fifo)
+		let indent = split(readfile(s:in_fifo)[0])
+
 		if len(indent) == 1
 			return indent[0] * &shiftwidth
 		else
