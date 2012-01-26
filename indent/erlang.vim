@@ -40,7 +40,7 @@ function ErlangIndent()
 		call writefile([v:lnum] + getline(1, v:lnum), s:out_fifo)
 		let indent = split(readfile(s:in_fifo)[0])
 
-		if len(indent) == 1
+		if len(indent) == 1 || !&expandtab
 			return indent[0] * &shiftwidth
 		else
 			return indent[1]
