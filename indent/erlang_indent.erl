@@ -14,17 +14,6 @@ main(["-f", File, Line]) ->
     Indent = format_indentation(source_indentation(Source, list_to_integer(Line))),
     io:format("~s~n", [Indent]);
 main([InFifo, OutFifo]) ->
-    try
-        indent_loop(InFifo, OutFifo)
-    catch
-        error:_ ->
-            main([InFifo, OutFifo])
-    end;
-main(_) ->
-    io:format("Usage: ~s <in_fifo> <out_fifo> | -f <file> <line>~n", [escript:script_name()]),
-    halt(1).
-
-indent_loop(InFifo, OutFifo) ->
     case read_fifo(InFifo) of
         [] ->
             halt(0);
@@ -32,8 +21,11 @@ indent_loop(InFifo, OutFifo) ->
             {ok, [Line], [$\n | Source]} = io_lib:fread("~d", Input),
             Indent = format_indentation(source_indentation(Source, Line)),
             write_fifo(OutFifo, lists:flatten(Indent)),
-            indent_loop(InFifo, OutFifo)
-    end.
+            main([InFifo, OutFifo])
+    end;
+main(_) ->
+    io:format("Usage: ~s <in_fifo> <out_fifo> | -f <file> <line>~n", [escript:script_name()]),
+    halt(1).
 
 read_fifo(Fifo) ->
     os:cmd("cat " ++ Fifo).
@@ -121,6 +113,8 @@ indentation_between(PrevToks, NextToks) ->
                 {Tab, Col}
         end
     catch
+        error:_ ->
+            {0, none};
         throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
             {hd(Tabs), hd(Cols)}
     end.
