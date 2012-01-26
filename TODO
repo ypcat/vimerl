@@ -1,5 +1,3 @@
-- Indent receive, try, case, if guards +2 tabs with
-  indent_next_token().
 - Fix indent bugs, look differences between:
 	indent_test.erl
 	indent_test2.erl

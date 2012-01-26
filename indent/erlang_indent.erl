@@ -127,12 +127,12 @@ parse_tokens(_) ->
     throw({parse_error, #state{}}).
 
 parse_attribute([T = {'-', _} | Tokens], State = #state{stack = []}) ->
-    parse_next(Tokens, push(State, T, 2));
+    parse_next(Tokens, indent(push(State, T, 1), 1));
 parse_attribute(_, State) ->
     throw({parse_error, State}).
 
 parse_function([T = {atom, _, _} | Tokens], State = #state{stack = []}) ->
-    parse_next(Tokens, push(State, T, 2));
+    parse_next(Tokens, indent(push(State, T, 1), 1));
 parse_function(_, State) ->
     throw({parse_error, State}).
 
@@ -161,15 +161,19 @@ parse_next2([{',', _} | Tokens], State = #state{stack = [T | _]}) when ?IS(T, '=
 parse_next2([{',', _} | Tokens], State) ->
     parse_next(Tokens, State);
 parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?IS(T2, '-'); ?IS(T2, atom) ->
-    parse_next(Tokens, push(State, T1, -1));
+    parse_next(Tokens, push(unindent(State), T1, 0));
 parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2 | _]}) when ?BRANCH_EXPR(T2) ->
-    parse_next(Tokens, push(State, T1, 1));
+    parse_next(Tokens, push(unindent(State), T1, 1));
+parse_next2([T | Tokens], State) when ?IS(T, 'if') ->
+    parse_next(Tokens, indent_after(Tokens, push(State, T, 1), 2));
 parse_next2([T | Tokens], State) when ?BRANCH_EXPR(T) ->
     parse_next(Tokens, push(State, T, 1));
+parse_next2([T | Tokens], State) when ?IS(T, 'of'); ?IS(T, 'catch'); ?IS(T, 'after') ->
+    parse_next(Tokens, indent_after(Tokens, State, 2));
 parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(T1, '->'), ?IS(T2, atom) ->
     parse_function(Tokens, pop(pop(State)));
 parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(T1, '->'), ?BRANCH_EXPR(T2) ->
-    parse_next(Tokens, pop(State));
+    parse_next(Tokens, indent_after(Tokens, pop(State), 2));
 parse_next2([{';', _} | Tokens], State) ->
     parse_next(Tokens, State);
 parse_next2([T | Tokens], State = #state{stack = [{'try', _} | _]}) when ?IS(T, 'catch'); ?IS(T, 'after') ->
@@ -189,10 +193,18 @@ parse_next2([], State) ->
 parse_next2(_, State) ->
     throw({parse_error, State}).
 
+indent(State, OffTab) ->
+    indent(State, OffTab, none).
+
 indent(State, OffTab, Col) ->
     Tabs = State#state.tabs,
     Cols = State#state.cols,
     State#state{tabs = [hd(Tabs) + OffTab | Tabs], cols = [Col | Cols]}.
+
+indent_after([], State, _) ->
+    State;
+indent_after(_Tokens, State, OffTab) ->
+    indent(State, OffTab).
 
 unindent(State = #state{tabs = Tabs, cols = Cols}) ->
     State#state{tabs = tl(Tabs), cols = tl(Cols)}.
@@ -211,7 +223,7 @@ next_relevant_token(Tokens) ->
 
 irrelevant_token(Token) ->
     Chars = ['(', ')', '{', '}', '[', ']', '<<', '>>', '=', '->', ',', ';', dot],
-    Keywords = ['fun', 'receive', 'if', 'case', 'try', 'catch', 'after', 'end'],
+    Keywords = ['fun', 'receive', 'if', 'case', 'try', 'of', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
 
