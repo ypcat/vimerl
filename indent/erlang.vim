@@ -33,9 +33,6 @@ function s:StopIndenter()
 	call delete(s:out_fifo)
 endfunction
 
-" TODO: Put FIFOs file in the .gitignore?
-" TODO: Only send to the indenter from function/attribute start.
-" TODO: Indent comments as the next-non-blank line.
 function ErlangIndent()
 	if v:lnum == 1
 		return 0
