@@ -1,6 +1,10 @@
 - Put FIFOs in the .gitignore?
 - Only send to the indenter from function/attribute start.
 - Indent comments as the next-non-blank line.
+- Indent receive, try, case, if guards +2 tabs with
+  indent_next_token().
 - Fix indent bugs, look differences between:
 	indent_test.erl
 	indent_test2.erl
+- Document the indenter, explain the FIFOs, where are they and what to
+  do if Vim stucks.
