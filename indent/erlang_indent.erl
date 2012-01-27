@@ -164,11 +164,11 @@ parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?IS(T2
     parse_next(Tokens, push(unindent(State), T1, 0));
 parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2 | _]}) when ?BRANCH_EXPR(T2) ->
     parse_next(Tokens, push(unindent(State), T1, 1));
-parse_next2([T | Tokens], State) when ?IS(T, 'if') ->
+parse_next2([T | Tokens], State) when ?IS(T, 'if'); ?IS(T, 'receive') ->
     parse_next(Tokens, indent_after(Tokens, push(State, T, 1), 2));
 parse_next2([T | Tokens], State) when ?BRANCH_EXPR(T) ->
     parse_next(Tokens, push(State, T, 1));
-parse_next2([T | Tokens], State) when ?IS(T, 'of'); ?IS(T, 'catch'); ?IS(T, 'after') ->
+parse_next2([T | Tokens], State) when ?IS(T, 'of') ->
     parse_next(Tokens, indent_after(Tokens, State, 2));
 parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(T1, '->'), ?IS(T2, atom) ->
     parse_function(Tokens, pop(pop(State)));
@@ -176,9 +176,15 @@ parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(
     parse_next(Tokens, indent_after(Tokens, pop(State), 2));
 parse_next2([{';', _} | Tokens], State) ->
     parse_next(Tokens, State);
-parse_next2([T | Tokens], State = #state{stack = [{'try', _} | _]}) when ?IS(T, 'catch'); ?IS(T, 'after') ->
+parse_next2([T | Tokens], State = #state{stack = [{'try', _} | _]}) when ?IS(T, 'catch') ->
+    parse_next(Tokens, indent_after(Tokens, State, 2));
+parse_next2([T | Tokens], State = #state{stack = [{'->', _} | _]}) when ?IS(T, 'catch') ->
+    parse_next(Tokens, indent_after(Tokens, pop(State), 2));
+parse_next2([T | Tokens], State = #state{stack = [{'try', _} | _]}) when ?IS(T, 'after') ->
     parse_next(Tokens, State);
-parse_next2([T | Tokens], State = #state{stack = [{'->', _} | _]}) when ?IS(T, 'catch'); ?IS(T, 'after') ->
+parse_next2([T | Tokens], State = #state{stack = [{'->', _}, {'receive', _} | _]}) when ?IS(T, 'after') ->
+    parse_next(Tokens, indent_after(Tokens, pop(State), 2));
+parse_next2([T | Tokens], State = #state{stack = [{'->', _} | _]}) when ?IS(T, 'after') ->
     parse_next(Tokens, pop(State));
 parse_next2([{'end', _} | Tokens], State = #state{stack = [{'try', _} | _]}) ->
     parse_next(Tokens, pop(State));
