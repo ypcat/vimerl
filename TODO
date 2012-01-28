@@ -1,5 +1,3 @@
-- Add debug code to the indent escript.
-- Fix split guards on `fun'.
 - Reindent the escripts to see if there is any indent bug.
 - Document the indenter, explain the FIFOs, where are they and what to
   do if Vim stucks. Recommend to use expandtab.

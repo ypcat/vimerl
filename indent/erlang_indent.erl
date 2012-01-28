@@ -2,12 +2,20 @@
 
 -mode(compile).
 
--record(state, {stack = [], tabs = [0], cols = [none]}).
+%-define(DEBUG, true).
+
+-ifdef(DEBUG).
+-define(PRINT_ERROR(T, S, L), io:format("Error: line ~B token ~p state ~p~n", [L, T, S])).
+-else.
+-define(PRINT_ERROR(T, S, L), true).
+-endif.
 
 -define(IS(T, C), (element(1, T) == C)).
 -define(OPEN_BRACKET(T), ?IS(T, '('); ?IS(T, '{'); ?IS(T, '['); ?IS(T, '<<')).
 -define(CLOSE_BRACKET(T), ?IS(T, ')'); ?IS(T, '}'); ?IS(T, ']'); ?IS(T, '>>')).
 -define(BRANCH_EXPR(T), ?IS(T, 'fun'); ?IS(T, 'receive'); ?IS(T, 'if'); ?IS(T, 'case'); ?IS(T, 'try')).
+
+-record(state, {stack = [], tabs = [0], cols = [none]}).
 
 main(["-f", File, Line]) ->
     Source = read_file(File),
@@ -113,30 +121,35 @@ indentation_between(PrevToks, NextToks) ->
                 {Tab, Col}
         end
     catch
-        error:_ ->
-            {0, none};
-        throw:{parse_error, #state{tabs = Tabs, cols = Cols}} ->
-            {hd(Tabs), hd(Cols)}
+        throw:{parse_error, LastToks, LastState, _Line} ->
+            case LastToks of
+                [] ->
+                    _LastTok = eof;
+                [_LastTok | _] ->
+                    _LastTok
+            end,
+            ?PRINT_ERROR(_LastTok, LastState, _Line),
+            {hd(LastState#state.tabs), hd(LastState#state.cols)}
     end.
 
 parse_tokens(Tokens = [{'-', _} | _]) ->
     parse_attribute(Tokens, #state{});
 parse_tokens(Tokens = [{atom, _, _} | _]) ->
     parse_function(Tokens, #state{});
-parse_tokens(_) ->
-    throw({parse_error, #state{}}).
+parse_tokens(Tokens) ->
+    throw({parse_error, Tokens, #state{}, ?LINE}).
 
 parse_attribute([T = {'-', _} | Tokens], State = #state{stack = []}) ->
     parse_next(Tokens, indent(push(State, T, 1), 1));
-parse_attribute(_, State) ->
-    throw({parse_error, State}).
+parse_attribute(Tokens, State) ->
+    throw({parse_error, Tokens, State, ?LINE}).
 
 parse_function([T = {atom, _, _} | Tokens], State = #state{stack = []}) ->
     parse_next(Tokens, indent(push(State, T, 1), 1));
 parse_function([], State) ->
     State;
-parse_function(_, State) ->
-    throw({parse_error, State}).
+parse_function(Tokens, State) ->
+    throw({parse_error, Tokens, State, ?LINE}).
 
 parse_next(Tokens, State) ->
     parse_next2(next_relevant_token(Tokens), State).
@@ -150,7 +163,7 @@ parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET
         true ->
             parse_next(Tokens, pop(State));
         false ->
-            throw({parse_error, State})
+            throw({parse_error, [T1 | Tokens], State, ?LINE})
     end;
 parse_next2([{'=', _} | Tokens], State = #state{stack = [T | _]}) when ?OPEN_BRACKET(T) ->
     parse_next(Tokens, State);
@@ -198,8 +211,8 @@ parse_next2([{dot, _} | Tokens], State = #state{stack = [T, _]}) when ?IS(T, '->
     parse_next(Tokens, pop(pop(State)));
 parse_next2([], State) ->
     State;
-parse_next2(_, State) ->
-    throw({parse_error, State}).
+parse_next2(Tokens, State) ->
+    throw({parse_error, Tokens, State, ?LINE}).
 
 indent(State, OffTab) ->
     indent(State, OffTab, none).
