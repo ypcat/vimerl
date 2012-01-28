@@ -96,8 +96,14 @@ indentation_between([], _) ->
 indentation_between(PrevToks, NextToks) ->
     try
         State = parse_tokens(PrevToks),
-        #state{tabs = [Tab | _], cols = [Col | _]} = State,
-        case {State#state.stack, NextToks} of
+        case State#state.stack of
+            [{'=', _} | _] ->
+                State2 = pop(State);
+            _ ->
+                State2 = State
+        end,
+        #state{tabs = [Tab | _], cols = [Col | _]} = State2,
+        case {State2#state.stack, NextToks} of
             {_, [T | _]} when ?CLOSE_BRACKET(T) ->
                 case Col of
                     none ->
