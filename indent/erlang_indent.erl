@@ -166,7 +166,7 @@ parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?IS(T2
     parse_next(Tokens, push(unindent(State), T1, 0));
 parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2 | _]}) when ?BRANCH_EXPR(T2) ->
     parse_next(Tokens, push(unindent(State), T1, 1));
-parse_next2([T | Tokens], State) when ?IS(T, 'if'); ?IS(T, 'receive') ->
+parse_next2([T | Tokens], State) when ?IS(T, 'fun'); ?IS(T, 'receive'); ?IS(T, 'if') ->
     parse_next(Tokens, indent_after(Tokens, push(State, T, 1), 2));
 parse_next2([T | Tokens], State) when ?BRANCH_EXPR(T) ->
     parse_next(Tokens, push(State, T, 1));
