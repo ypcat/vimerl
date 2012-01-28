@@ -6,8 +6,10 @@
 
 -ifdef(DEBUG).
 -define(PRINT_ERROR(T, S, L), io:format("Error: line ~B token ~p state ~p~n", [L, T, S])).
+-define(PRINT_STATE(S), io:format("Debug: state ~p~n", [S])).
 -else.
 -define(PRINT_ERROR(T, S, L), true).
+-define(PRINT_STATE(S), true).
 -endif.
 
 -define(IS(T, C), (element(1, T) == C)).
@@ -96,6 +98,7 @@ indentation_between([], _) ->
 indentation_between(PrevToks, NextToks) ->
     try
         State = parse_tokens(PrevToks),
+        ?PRINT_STATE(State),
         case State#state.stack of
             [{'=', _} | _] ->
                 State2 = pop(State);
