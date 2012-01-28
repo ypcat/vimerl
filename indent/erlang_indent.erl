@@ -171,6 +171,8 @@ parse_next2([T1 = {'=', _} | Tokens], State = #state{stack = [T2 | _]}) when ?IS
     parse_next(Tokens, push(pop(State), T1, 1, column(T1) + 1));
 parse_next2([T = {'=', _} | Tokens], State) ->
     parse_next(Tokens, push(State, T, 1, column(T) + 1));
+parse_next2(Tokens = [T1 | _], State = #state{stack = [T2 | _]}) when ?IS(T2, '='), not ?IS(T1, ','), not ?IS(T1, ';') ->
+    parse_next2(Tokens, pop(State));
 parse_next2([{',', _} | Tokens], State = #state{stack = [T | _]}) when ?IS(T, '=') ->
     parse_next(Tokens, pop(State));
 parse_next2([{',', _} | Tokens], State) ->
