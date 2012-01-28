@@ -133,6 +133,8 @@ parse_attribute(_, State) ->
 
 parse_function([T = {atom, _, _} | Tokens], State = #state{stack = []}) ->
     parse_next(Tokens, indent(push(State, T, 1), 1));
+parse_function([], State) ->
+    State;
 parse_function(_, State) ->
     throw({parse_error, State}).
 
