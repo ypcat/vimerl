@@ -124,7 +124,7 @@ indentation_between(PrevToks, NextToks) ->
                 end;
             {[{'try', _} | _], [T | _]} when ?IS(T, 'catch'); ?IS(T, 'after') ->
                 {Tab2 - 1, none};
-            {[{'->', _} | _], [T | _]} when ?IS(T, 'catch'); ?IS(T, 'after') ->
+            {[{'->', _}, {'try', _} | _], [T | _]} when ?IS(T, 'catch'); ?IS(T, 'after') ->
                 {Tab2 - 2, none};
             {[T1 | _], [T2 | _]} when ?IS(T1, 'try'), ?IS(T2, 'end') ->
                 {Tab2 - 1, none};
@@ -224,9 +224,12 @@ parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2]}) when ?IS(T2
     parse_next(Tokens, push(unindent(State), T1, 0));
 parse_next2([T1 = {'->', _} | Tokens], State = #state{stack = [T2 | _]}) when ?BRANCH_EXPR(T2) ->
     parse_next(Tokens, push(unindent(State), T1, 1));
+parse_next2([{'catch', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when
+        not ?IS(T1, 'try'), not (?IS(T1, '->') and ?IS(T2, 'try')) ->
+    parse_next(Tokens, State);
 parse_next2([T | Tokens], State = #state{stack = [{'try', _} | _]}) when ?IS(T, 'catch') ->
     parse_next(Tokens, indent_after(Tokens, State, 2));
-parse_next2([T | Tokens], State = #state{stack = [{'->', _} | _]}) when ?IS(T, 'catch') ->
+parse_next2([T | Tokens], State = #state{stack = [{'->', _}, {'try', _} | _]}) when ?IS(T, 'catch') ->
     parse_next(Tokens, indent_after(Tokens, pop(State), 2));
 parse_next2([T | Tokens], State = #state{stack = [{'try', _} | _]}) when ?IS(T, 'after') ->
     parse_next(Tokens, State);
