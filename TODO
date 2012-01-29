@@ -1,3 +1,4 @@
-- Fix syntax case: fun F/N
+- Fix syntax support: fun F/N
+- Fix syntax support for `catch ...' with/without `(...)'.
 - Document the indenter, explain the FIFOs, where are they and what to
   do if Vim stucks. Recommend to use expandtab.
