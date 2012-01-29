@@ -164,9 +164,19 @@ parse_next(Tokens, State) ->
     parse_next2(next_relevant_token(Tokens), State).
 
 parse_next2([T | Tokens], State) when ?IS(T, '<<') ->
-    parse_next(Tokens, push(State, T, 1, column(T) + 1));
+    case same_line(T, Tokens) of
+        true ->
+            parse_next(Tokens, push(State, T, 1, column(T) + 1));
+        false ->
+            parse_next(Tokens, push(State, T, 1))
+    end;
 parse_next2([T | Tokens], State) when ?OPEN_BRACKET(T) ->
-    parse_next(Tokens, push(State, T, 1, column(T)));
+    case same_line(T, Tokens) of
+        true ->
+            parse_next(Tokens, push(State, T, 1, column(T)));
+        false ->
+            parse_next(Tokens, push(State, T, 1))
+    end;
 parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET(T1) ->
     case symmetrical(category(T1)) == category(T2) of
         true ->
@@ -260,6 +270,14 @@ irrelevant_token(Token) ->
     Keywords = ['fun', 'receive', 'if', 'case', 'try', 'of', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
+
+same_line(_, []) ->
+    false;
+same_line(Token, [NextTok | _]) ->
+    case line(Token) == line(NextTok) of
+        true  -> true;
+        false -> false
+    end.
 
 symmetrical(')')  -> '(';
 symmetrical('}')  -> '{';

@@ -1,2 +1,3 @@
+- Fix syntax case: fun F/N
 - Document the indenter, explain the FIFOs, where are they and what to
   do if Vim stucks. Recommend to use expandtab.
