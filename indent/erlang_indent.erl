@@ -53,9 +53,14 @@ format_indentation({Tab, Col}) ->
     io_lib:format("~B ~B", [Tab, Col]).
 
 source_indentation(Source, Line) ->
-    Tokens = tokenize_source(Source),
-    {PrevToks, NextToks} = split_prev_block(Tokens, Line),
-    indentation_between(PrevToks, NextToks).
+    try
+        Tokens = tokenize_source(Source),
+        {PrevToks, NextToks} = split_prev_block(Tokens, Line),
+        indentation_between(PrevToks, NextToks)
+    catch
+        throw:scan_error ->
+            {-1, none}
+    end.
 
 tokenize_source(Source) ->
     eat_shebang(tokenize_source2(Source)).
@@ -65,7 +70,7 @@ tokenize_source2(Source) ->
         {ok, Tokens, _} ->
             Tokens;
         {error, _, _} ->
-            []
+            throw(scan_error)
     end.
 
 eat_shebang([{'#', {N, _}}, {'!', {N, _}} | Tokens]) ->
