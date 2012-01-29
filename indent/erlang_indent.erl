@@ -238,7 +238,7 @@ parse_next2([T | Tokens], State = #state{stack = [{'->', _}, {'try', _} | _]}) w
 parse_next2([T | Tokens], State = #state{stack = [{'try', _} | _]}) when ?IS(T, 'after') ->
     parse_next(Tokens, State);
 parse_next2([T | Tokens], State = #state{stack = [{'receive', _} | _]}) when ?IS(T, 'after') ->
-    parse_next(Tokens, unindent(State));
+    parse_next(Tokens, indent_after(Tokens, unindent(State), 2));
 parse_next2([T | Tokens], State = #state{stack = [{'->', _}, {'receive', _} | _]}) when ?IS(T, 'after') ->
     parse_next(Tokens, indent_after(Tokens, pop(State), 2));
 parse_next2([T | Tokens], State = #state{stack = [{'->', _} | _]}) when ?IS(T, 'after') ->

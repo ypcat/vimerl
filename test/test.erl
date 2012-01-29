@@ -145,6 +145,13 @@ foo() ->
 
 foo() ->
     receive
+    after
+        1000 ->
+            bar()
+    end.
+
+foo() ->
+    receive
         foo when
                 foo ->
             foo()
