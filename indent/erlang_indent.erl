@@ -190,7 +190,7 @@ parse_next2(Tokens = [{';', _} | _], State = #state{stack = [T | _]}) when ?IS(T
     parse_next2(Tokens, pop(State));
 parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(T1, '->'), ?IS(T2, atom) ->
     parse_function(Tokens, pop(pop(State)));
-parse_next2([{';', _} | Tokens], State = #state{stack = [T1, T2 | _]}) when ?IS(T1, '->'), ?BRANCH_EXPR(T2) ->
+parse_next2([{';', _} | Tokens], State = #state{stack = [{'->', _}, T | _]}) when ?BRANCH_EXPR(T) ->
     parse_next(Tokens, indent_after(Tokens, pop(State), 2));
 parse_next2([{';', _} | Tokens], State) ->
     parse_next(Tokens, State);
