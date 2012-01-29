@@ -104,13 +104,14 @@ indentation_between(PrevToks, NextToks) ->
     try
         State = parse_tokens(PrevToks),
         ?PRINT_STATE(State),
-        case State#state.stack of
+        State2 = case State#state.stack of
             [{'=', _} | _] ->
-                State2 = pop(State);
+                pop(State);
             _ ->
-                State2 = State
+                State
         end,
-        #state{tabs = [Tab | _], cols = [Col | _]} = State2,
+        #state{tabs = [Tab | _], cols = [Col | _]} = State,
+        Tab2 = hd(State2#state.tabs),
         case {State2#state.stack, NextToks} of
             {_, [T | _]} when ?CLOSE_BRACKET(T) ->
                 case Col of
@@ -122,15 +123,15 @@ indentation_between(PrevToks, NextToks) ->
                         {Tab, Col - 1}
                 end;
             {[{'try', _} | _], [T | _]} when ?IS(T, 'catch'); ?IS(T, 'after') ->
-                {Tab - 1, none};
+                {Tab2 - 1, none};
             {[{'->', _} | _], [T | _]} when ?IS(T, 'catch'); ?IS(T, 'after') ->
-                {Tab - 2, none};
+                {Tab2 - 2, none};
             {[T1 | _], [T2 | _]} when ?IS(T1, 'try'), ?IS(T2, 'end') ->
-                {Tab - 1, none};
+                {Tab2 - 1, none};
             {[T1 | _], [T2 | _]} when ?IS(T1, '->'), ?IS(T2, 'end') ->
-                {Tab - 2, none};
+                {Tab2 - 2, none};
             {_, [T | _]} when ?IS(T, 'of') ->
-                {Tab - 1, none};
+                {Tab2 - 1, none};
             _ ->
                 {Tab, Col}
         end
