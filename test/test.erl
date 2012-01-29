@@ -20,7 +20,11 @@ foo() ->
         3
        ),
     X = 1 + 2 +
-    3 + 4, % FIXME
+        3 + 4,
+    Y = case foo() of
+        foo ->
+            bar()
+    end,
     ok.
 
 foo() ->
@@ -36,7 +40,7 @@ fooooooooo(X,
     ok.
 
 foo() ->
-    try
+    X = try
         foo()
     catch
         foo when
