@@ -15,7 +15,8 @@
     Key :: integer().
 
 foo() ->
-    bar(1,
+    bar(fun foo/0,
+        1,
         2,
         3
        ),
