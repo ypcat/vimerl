@@ -41,7 +41,34 @@ fooooooooo(X,
     ok.
 
 foo() ->
+    case foo() of
+        bar ->
+            catch fii();
+        fuu() ->
+            ber()
+    end.
+
+foo() ->
+    case foo() of
+        bar ->
+            X = catch fii();
+        fuu() ->
+            ber()
+    end.
+
+foo() ->
     X = try
+        foo()
+    catch
+        foo when
+                foo ->
+            bar()
+    after
+        bar()
+    end.
+
+foo() ->
+    try
         foo()
     catch
         foo when
