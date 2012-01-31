@@ -28,7 +28,10 @@ Copy the content of the tarball to your `.vim'. Don't forget to run
 `:helptags' if you are not using Pathogen.
 
 Vimerl requires to have a recent version of Erlang installed in your
-system with `escript' in your $PATH and to use Vim 7.3 or newer.
+system with `escript' in your $PATH.
+
+With a Vim version older than 7.3 syntax checking will be disabled as
+some required features won't be available.
 
 
  How to use it
