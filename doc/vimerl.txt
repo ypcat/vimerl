@@ -66,6 +66,9 @@ bug in the escript which crashed and Vim is waiting for it to respond. So, if
 that happens to you, kill Vim and reopen the file. It also would be nice to
 report the bug to me :-)
 
+Note: indenting a large block of lines with the |=| or |v_=| command will take
+      some time to finish.
+
 ------------------------------------------------------------------------------
 2.2 Code folding                                              *vimerl-folding*
 
