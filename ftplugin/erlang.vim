@@ -31,11 +31,6 @@ let s:erlang_fun_begin = '^\a\w*(.*$'
 let s:erlang_fun_end   = '^[^%]*\.\s*\(%.*\)\?$'
 
 function s:SetErlangOptions()
-	compiler erlang
-	if version >= 700
-		setlocal omnifunc=erlang_complete#Complete
-	endif
-
 	if g:erlang_folding
 		setlocal foldmethod=expr
 		setlocal foldexpr=GetErlangFold(v:lnum)
