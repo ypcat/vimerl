@@ -64,7 +64,7 @@ syn match erlangRecordDef                    /^-record\s*(\@=/
 syn match erlangDefine                       /^-\%(define\|undef\)\s*(\@=/
 syn match erlangPreCondit                    /^-\%(ifdef\|ifndef\|else\|endif\)\%(\s*(\@=\)\?/
 
-syn match erlangType                         /^-\%(spec\|type\|callback\)[( ]\@=/
+syn match erlangType                         /^-\%(spec\|type\|opaque\|callback\)[( ]\@=/
 
 syn match erlangMacro                        /\%(-define(\)\@<=\w\+/
 syn match erlangMacro                        /?\??\w\+/
