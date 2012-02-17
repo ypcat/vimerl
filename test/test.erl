@@ -15,6 +15,22 @@
     Key :: integer().
 
 foo() ->
+    case
+        {foooooooooooooooooo,
+         baaaaaaaaaaaaaaaaar}
+    of
+        ok ->
+            ok
+    end,
+    X = [{a, b}, c,
+         {d, e, f,
+          g}],
+    Y = <<X, X, X,
+          X, X, X>>,
+    [Z || {_, Z} <- L, Z /= 1,
+          Z /= 10].
+
+foo() ->
     bar(fun foo/0,
         1,
         2,

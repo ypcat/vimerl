@@ -194,6 +194,8 @@ parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET
         false ->
             throw({parse_error, [T1 | Tokens], State, ?LINE})
     end;
+parse_next2([T1 = {'||', _} | Tokens], State = #state{stack = [T2 | _]}) when ?IS(T2, '['); ?IS(T2, '<<') ->
+    parse_next(Tokens, reindent(State, 1, column(T1) + 2));
 parse_next2([{'=', _} | Tokens], State = #state{stack = [T | _]}) when ?OPEN_BRACKET(T) ->
     parse_next(Tokens, State);
 parse_next2([T1 = {'=', _} | Tokens], State = #state{stack = [T2 | _]}) when ?IS(T2, '=') ->
@@ -269,6 +271,11 @@ indent_after([], State, _) ->
 indent_after(_Tokens, State, OffTab) ->
     indent(State, OffTab).
 
+reindent(State, OffTab, Col) ->
+    [Tab | Tabs] = State#state.tabs,
+    [_ | Cols] = State#state.cols,
+    State#state{tabs = [Tab + OffTab | Tabs], cols = [Col | Cols]}.
+
 unindent(State = #state{tabs = Tabs, cols = Cols}) ->
     State#state{tabs = tl(Tabs), cols = tl(Cols)}.
 
@@ -285,7 +292,7 @@ next_relevant_token(Tokens) ->
     lists:dropwhile(fun(T) -> irrelevant_token(T) end, Tokens).
 
 irrelevant_token(Token) ->
-    Chars = ['(', ')', '{', '}', '[', ']', '<<', '>>', '=', '->', ',', ';', dot],
+    Chars = ['(', ')', '{', '}', '[', ']', '<<', '>>', '=', '->', '||', ',', ';', dot],
     Keywords = ['fun', 'receive', 'if', 'case', 'try', 'of', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).
