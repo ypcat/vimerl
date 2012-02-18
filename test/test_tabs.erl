@@ -34,7 +34,16 @@ foo() ->
 			fun(N) ->
 					N + 2
 			end,
-			L).
+			L),
+	L4 = lists:map(
+			fun
+				(1) ->
+					N + 1;
+				(2) ->
+					N + 2;
+				(_) ->
+					N
+			end, L).
 
 foo() ->
 	case
