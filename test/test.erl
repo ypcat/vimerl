@@ -1,3 +1,5 @@
+%%% vim: expandtab tabstop=4 shiftwidth=4
+
 -module(test).
 
 -export([foo/0,
@@ -6,9 +8,16 @@
         ]).
 
 -export([
-            foo/1,
-            baaaaar/2,
-            baaaaaaaaa/4]).
+    foo/1,
+    baaaaar/2,
+    baaaaaaaaa/4]).
+
+-define(FOO,
+        666 + 777).
+
+-vsn(
+    "My beta version"
+    ).
 
 -spec foo(X) -> {ok, Key} | {false, X} when
     X :: iter(),
