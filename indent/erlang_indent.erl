@@ -195,7 +195,12 @@ parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET
             throw({parse_error, [T1 | Tokens], State, ?LINE})
     end;
 parse_next2([T1 = {'||', _} | Tokens], State = #state{stack = [T2 | _]}) when ?IS(T2, '['); ?IS(T2, '<<') ->
-    parse_next(Tokens, reindent(State, 1, column(T1) + 2));
+    case same_line(T1, Tokens) of
+        true ->
+            parse_next(Tokens, reindent(State, 1, column(T1) + 2));
+        false ->
+            parse_next(Tokens, reindent(State, 0))
+    end;
 parse_next2([{'=', _} | Tokens], State = #state{stack = [T | _]}) when ?OPEN_BRACKET(T) ->
     parse_next(Tokens, State);
 parse_next2([T1 = {'=', _} | Tokens], State = #state{stack = [T2 | _]}) when ?IS(T2, '=') ->
@@ -270,6 +275,9 @@ indent_after([], State, _) ->
     State;
 indent_after(_Tokens, State, OffTab) ->
     indent(State, OffTab).
+
+reindent(State, OffTab) ->
+    reindent(State, OffTab, none).
 
 reindent(State, OffTab, Col) ->
     [Tab | Tabs] = State#state.tabs,
