@@ -15,6 +15,19 @@
     Key :: integer().
 
 foo() ->
+    L = [1, 2
+         3
+        ],
+    L2 = lists:map(fun(N) ->
+                    N + 1
+            end, L),
+    L3 = lists:map(
+            fun(N) ->
+                    N + 2
+            end,
+            L).
+
+foo() ->
     case
         {foooooooooooooooooo,
          baaaaaaaaaaaaaaaaar}
