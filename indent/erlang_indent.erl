@@ -158,8 +158,12 @@ parse_tokens(Tokens = [{atom, _, _} | _]) ->
 parse_tokens(Tokens) ->
     throw({parse_error, Tokens, #state{}, ?LINE}).
 
-parse_attribute([T = {'-', _} | Tokens], State = #state{stack = []}) ->
+parse_attribute([T = {'-', _}, {atom, _, export} | Tokens], State = #state{stack = []}) ->
+    parse_next(Tokens, push(State, T, -1));
+parse_attribute([T = {'-', _}, {atom, _, spec} | Tokens], State = #state{stack = []}) ->
     parse_next(Tokens, push(State, T, 1));
+parse_attribute([T = {'-', _} | Tokens], State = #state{stack = []}) ->
+    parse_next(Tokens, push(State, T, 0));
 parse_attribute(Tokens, State) ->
     throw({parse_error, Tokens, State, ?LINE}).
 
