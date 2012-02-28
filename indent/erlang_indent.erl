@@ -1,4 +1,5 @@
 #!/usr/bin/env escript
+%%! -detached
 
 -mode(compile).
 
