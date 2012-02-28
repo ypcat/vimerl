@@ -13,8 +13,6 @@
          terminate/2,
          code_change/3]).
 
--define(SERVER, ?MODULE).
-
 -record(state, {}).
 
 %%%===================================================================
@@ -29,7 +27,7 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %%%===================================================================
 %%% gen_server callbacks
