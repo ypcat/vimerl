@@ -161,8 +161,8 @@ parse_tokens(Tokens) ->
 
 parse_attribute([T = {'-', _}, {atom, _, export} | Tokens], State = #state{stack = []}) ->
     parse_next(Tokens, push(State, T, -1));
-parse_attribute([T = {'-', _}, {atom, _, spec} | Tokens], State = #state{stack = []}) ->
-    parse_next(Tokens, push(State, T, 1));
+parse_attribute([T1 = {'-', _}, T2, T3 | Tokens], State = #state{stack = []}) when ?IS(T2, atom), ?IS(T3, atom) ->
+    parse_next(Tokens, push(State, T1, 1));
 parse_attribute([T = {'-', _} | Tokens], State = #state{stack = []}) ->
     parse_next(Tokens, push(State, T, 0));
 parse_attribute(Tokens, State) ->
