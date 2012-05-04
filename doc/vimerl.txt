@@ -198,6 +198,13 @@ values: dictionary): >
 Note: the "year" key may be omitted, in that case the current year is used.
 
 ------------------------------------------------------------------------------
+                                                         *'erlang_skel_dir'*
+
+This option allows you to define a custom directory to use for loading
+code skeletons. By default it will use the code skeletons included in
+vimerl under plugin/erlang_skels.
+
+------------------------------------------------------------------------------
                                                          *'erlang_keywordprg'*
 
 This option defines the command used to show man pages with the |K| command
