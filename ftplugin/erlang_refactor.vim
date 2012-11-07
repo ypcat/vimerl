@@ -48,8 +48,14 @@ function! s:send_rpc(module, fun, args)
     let result = system(command)
 "    echo result
     if match(result, 'erl_call: failed to connect to node .*') != -1
-        call StartWranglerServer()
-        return system(command)
+        if a:fun == "halt"
+            " If the function called was 'halt' we assume the wrangler server
+            " needs to be stopped, so we don't need to start it first.
+            return
+        else
+            call StartWranglerServer()
+            return system(command)
+        endif
     endif
     return result
 endfunction
@@ -173,7 +179,7 @@ function! s:call_rename(mode, line, col, name, search_path)
         call confirm(msg)
         return 0
     endif
-    echo "\nThis files will be changed: " . matchstr(msg, "[^]]*", 1)
+    echo "\nThese files will be changed: " . matchstr(msg, "[^]]*", 1)
     echo s:send_confirm()
     return 1
 endfunction
