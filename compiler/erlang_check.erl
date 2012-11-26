@@ -31,7 +31,7 @@ rebar_file(Dir) ->
     end.
 
 rebar_opts(RebarFile) ->
-   case file:consult(RebarFile) of
+    case file:consult(RebarFile) of
         {ok, Terms} ->
             RebarLibDirs = proplists:get_value(lib_dirs, Terms, []),
             lists:foreach(
@@ -46,4 +46,3 @@ rebar_opts(RebarFile) ->
         {error, _} ->
             rebar_opts("rebar.config")
     end.
-
