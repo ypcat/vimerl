@@ -8,18 +8,22 @@
 " License:      Vim license
 " Version:      2012/11/26
 
-" Completion program path
-let s:erlang_complete_file = expand('<sfile>:p:h') . '/erlang_complete.erl'
-
-let s:erlang_complete_cache_file = expand('<sfile>:p:h') . '/erlang_index'
-let s:erlang_cache_load = 0
-
 if !exists('g:erlang_completion_cache')
 	let g:erlang_completion_cache = 1
 endif
 
+" Completion program path
+let s:erlang_complete_file = expand('<sfile>:p:h') . '/erlang_complete.erl'
+
 " Modules cache used to speed up the completion
 let s:modules_cache = {}
+
+" File cache for persistence between Vim sessions
+if filewritable(expand('<sfile>:p:h')) == 2
+	let s:file_cache = expand('<sfile>:p:h') . '/vimerl_cache'
+else
+	let s:file_cache = '/tmp/vimerl_cache'
+endif
 
 " Patterns for completions
 let s:erlang_local_func_beg    = '\(\<[0-9A-Za-z_-]*\|\s*\)$'
@@ -28,11 +32,6 @@ let s:erlang_blank_line        = '^\s*\(%.*\)\?$'
 
 " Main function for completion
 function erlang_complete#Complete(findstart, base)
-	if s:erlang_cache_load == 0
-		call s:ErlangLoadCache(a:base)
-		let s:erlang_cache_load = 1
-	endif
-
 	let lnum = line('.')
 	let column = col('.')
 	let line = strpart(getline('.'), 0, column - 1)
@@ -144,9 +143,9 @@ function s:ErlangFindExternalFunc(module, base)
 	if has_key(s:modules_cache, a:module)
 		let func_list = get(s:modules_cache, a:module)
 		if len(func_list) > 0
-			let tmp_cache = {a:module: func_list}
-			execute 'redir >>' . s:erlang_complete_cache_file
-			silent echon tmp_cache
+			let cache_entry = {a:module : func_list}
+			execute 'redir >>' . s:file_cache
+			silent echon cache_entry
 			silent echon "\n"
 			redir END
 		endif
@@ -178,17 +177,20 @@ function s:ErlangFindLocalFunc(base)
 	return []
 endfunction
 
-function s:ErlangLoadCache(base)
-	if filereadable(s:erlang_complete_cache_file)
-		for line in readfile(s:erlang_complete_cache_file)
-			let cache = eval(line)
-			for key in keys(cache)
-				" add module function list to the cache
-				let function_list = get(cache, key)
-				let s:modules_cache[key] = function_list
+function s:ErlangLoadCache()
+	if filereadable(s:file_cache)
+		for line in readfile(s:file_cache)
+			let cache_entry = eval(line)
+			" cache_entry is a dict with just one key with the
+			" module name and the function list we are going to
+			" add to the memory cache as the value of this key
+			for mod_name in keys(cache_entry)
+				let func_list = get(cache_entry, mod_name)
+				let s:modules_cache[mod_name] = func_list
 			endfor
 		endfor
 	endif
-
-	return []
 endfunction
+
+" Load the file cache the first time this script is loaded
+call s:ErlangLoadCache()
