@@ -4,8 +4,9 @@
 " Contributors: kTT (http://github.com/kTT)
 "               Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 "               Eduardo Lopez (http://github.com/tapichu)
+"               Zhihui Jiao (http://github.com/onlychoice)
 " License:      Vim license
-" Version:      2012/01/14
+" Version:      2012/11/26
 
 " Completion program path
 let s:erlang_complete_file = expand('<sfile>:p:h') . '/erlang_complete.erl'
@@ -139,14 +140,16 @@ function s:ErlangFindExternalFunc(module, base)
 		endif
 	endfor
 
-	let func_lists = s:modules_cache[a:module]
-	if len(func_lists) > 0
-		let tmp_cache = {a:module : func_lists}
-		" write cache to file
-		exe "redir! >> " . s:erlang_complete_cache_file
-		silent echon tmp_cache
-		silent echon "\n"
-		redir END
+	" Write all the module functions to the cache file
+	if has_key(s:modules_cache, a:module)
+		let func_list = get(s:modules_cache, a:module)
+		if len(func_list) > 0
+			let tmp_cache = {a:module: func_list}
+			execute 'redir >>' . s:erlang_complete_cache_file
+			silent echon tmp_cache
+			silent echon "\n"
+			redir END
+		endif
 	endif
 
 	return []
