@@ -2,7 +2,7 @@
 " Language: Erlang
 " Author:   Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 " License:  Vim license
-" Version:  2012/06/28
+" Version:  2012/11/25
 
 if exists('g:loaded_erlang_skel') || v:version < 700 || &compatible
 	finish
