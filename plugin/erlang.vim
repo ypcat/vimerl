@@ -130,11 +130,11 @@ function DialyzerOpts(...)
 endfunction
 
 function DialyzerParseOutput(output)
-   return ErlcParseOutput(output)
+   return ErlcParseOutput(a:output)
 endfunction
 
 function DialyzerParseFile(filename)
-    return ErlcParseFile(filename)
+    return ErlcParseFile(a:filename)
 endfunction
 
 
