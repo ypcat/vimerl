@@ -27,6 +27,9 @@ if !exists('g:erlang_tools_qf_mode')
     let g:erlang_tools_qf_mode = 'c'
 endif
 
+if !exists('g:erlang_no_commands')
+    let g:erlang_no_commands = 0
+endif
 
 function Erlc(...)
     let opts = call (function('ErlcOpts'), a:000)
@@ -277,11 +280,14 @@ function ErlangToolOpts(varname, opts)
     endif
 endfunction
 
-command -nargs=* Erlc call Erlc(<f-args>)
-command -nargs=* ErlcOpts echo ErlcOpts(<f-args>)
-command -nargs=* Rebar call Rebar(<f-args>)
-command -nargs=* RebarOpts echo RebarOpts(<f-args>)
-command -nargs=* Dialyzer call Dialyzer(<f-args>)
-command -nargs=* DialyzerOpts echo DialyzerOpts(<f-args>)
-command -nargs=* CTRun call CTRun(<f-args>)
-command -nargs=* CTRunOpts echo CTRunOpts(<f-args>)
+
+if g:erlang_no_commands == 0
+    command -nargs=* Erlc call Erlc(<f-args>)
+    command -nargs=* ErlcOpts echo ErlcOpts(<f-args>)
+    command -nargs=* Rebar call Rebar(<f-args>)
+    command -nargs=* RebarOpts echo RebarOpts(<f-args>)
+    command -nargs=* Dialyzer call Dialyzer(<f-args>)
+    command -nargs=* DialyzerOpts echo DialyzerOpts(<f-args>)
+    command -nargs=* CTRun call CTRun(<f-args>)
+    command -nargs=* CTRunOpts echo CTRunOpts(<f-args>)
+endif
