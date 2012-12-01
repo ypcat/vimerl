@@ -7,6 +7,10 @@ if !exists('g:erlang_erlc')
     let g:erlang_erlc = 'erlc'
 endif
 
+if !exists('g:erlang_rebar')
+    let g:erlang_rebar = 'rebar'
+endif
+
 if !exists('g:erlang_dialyzer')
     let g:erlang_dialyzer = 'dialyzer'
 endif
@@ -111,6 +115,51 @@ function ErlcParseBuffer(...)
     endif
 endfunction
 
+function Rebar(...)
+    let opts = call (function('RebarOpts'), a:000)
+    if empty(opts)
+        let cmd = g:erlang_rebar
+    else
+        let cmd = g:erlang_rebar . ' ' . opts
+    endif
+    echo cmd
+    let output = system(cmd)
+    echo output
+    return RebarParseOutput(output)
+endfunction
+
+function RebarParseOutput(output)
+    if type(a:output) == 1
+        let output = split(a:output, "\n")
+        return RebarParseOutput(output)
+    else
+        let rebarcmd = ''
+        let qf_list = []
+        let qf_item = {}
+        for line in a:output
+            let list = matchlist(line,'^==> \(\a\w*\|''[^'']*''\) (\(\a\+\))\s*$')
+            if !empty(list)
+                let rebarcmd = list[2]
+            endif
+            if rebarcmd == 'compile'
+                let qf_item = ErlcParseLine(line)
+                if !empty(qf_item)
+                    call add(qf_list, qf_item)
+                endif
+            endif
+        endfor
+        if !empty(qf_list)
+            call setqflist(qf_list, g:erlang_tools_qf_mode)
+            return 1
+        else
+            return 0
+        endif
+    endif
+endfunction
+
+function RebarOpts(...)
+    return ErlangToolOpts('erlang_rebar_opts', a:000)
+endfunction
 
 function Dialyzer(...)
     let opts = call (function('DialyzerOpts'), a:000)
@@ -230,6 +279,8 @@ endfunction
 
 command -nargs=* Erlc call Erlc(<f-args>)
 command -nargs=* ErlcOpts echo ErlcOpts(<f-args>)
+command -nargs=* Rebar call Rebar(<f-args>)
+command -nargs=* RebarOpts echo RebarOpts(<f-args>)
 command -nargs=* Dialyzer call Dialyzer(<f-args>)
 command -nargs=* DialyzerOpts echo DialyzerOpts(<f-args>)
 command -nargs=* CTRun call CTRun(<f-args>)
