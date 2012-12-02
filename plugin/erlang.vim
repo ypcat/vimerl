@@ -182,7 +182,30 @@ function DialyzerOpts(...)
 endfunction
 
 function DialyzerParseOutput(output)
-   return ErlcParseOutput(a:output)
+    if type(a:output) == 1
+        let output = split(a:output, "\n")
+        return DialyzerParseOutput(output)
+    else
+        let result = ErlcParseOutput(a:output)
+        if result == 0
+            let outputfile = ''
+            let pat = '^\s*Check output file `\(\f\+\)'' for details\s*$'
+            for line in a:output
+                let list = matchlist(line, pat)
+                if !empty(list)
+                    let outputfile = list[1]
+                    break
+                endif
+            endfor
+            if !empty(outputfile)
+                return DialyzerParseFile(outputfile)
+            else
+                return result
+            endif
+        else
+            return result
+        endif
+    endif
 endfunction
 
 function DialyzerParseFile(filename)
