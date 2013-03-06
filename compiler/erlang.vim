@@ -3,7 +3,7 @@
 " Author:       Pawel 'kTT' Salata <rockplayer.pl@gmail.com>
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 " License:      Vim license
-" Version:      2012/02/08
+" Version:      2013/03/06
 
 if exists("current_compiler") || v:version < 703
 	finish
@@ -89,7 +89,7 @@ function s:EnableShowErrors()
 	if !s:autocmds_defined
 		augroup vimerl
 			autocmd!
-			autocmd BufWritePre *.erl call s:ClearErrors()
+			autocmd BufWritePre  *.erl call s:ClearErrors()
 			autocmd BufWritePost *.erl call s:ShowErrors()
 			autocmd CursorHold   *.erl call s:ShowErrorMsg()
 			autocmd CursorMoved  *.erl call s:ShowErrorMsg()
