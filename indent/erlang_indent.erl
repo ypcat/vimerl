@@ -1,7 +1,11 @@
 #!/usr/bin/env escript
 %%! -detached
 
--mode(compile).
+% XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
+% There seems to be a compiler bug in the R16 release which makes to compilation
+% of this script painfully slow. Comment out the next line when the issue is fixed:
+%-mode(compile).
+% XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
 
 %-define(DEBUG, true).
 
