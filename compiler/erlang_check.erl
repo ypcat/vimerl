@@ -28,7 +28,7 @@ rebar_file(Dir) ->
     end.
 
 rebar_opts(RebarFile) ->
-    Dir = get_root(filename:dirname(File)),
+    Dir = get_root(filename:dirname(RebarFile)),
     case file:consult(RebarFile) of
         {ok, Terms} ->
             RebarLibDirs = proplists:get_value(lib_dirs, Terms, []),
