@@ -48,6 +48,7 @@ function s:ShowErrors()
 		execute "setlocal makeprg=" . s:erlang_check_file . "\\ \%"
 	endif
 	silent make!
+	call s:ClearErrors()
 	for error in getqflist()
 		let item         = {}
 		let item["lnum"] = error.lnum
