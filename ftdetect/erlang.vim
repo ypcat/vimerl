@@ -1,1 +1,1 @@
-au BufRead,BufNewFile *.hrl,*.erl,rebar.config,*.app,*.app.src set ft=erlang
+au BufRead,BufNewFile *.hrl,*.erl,rebar.config,*.app,*.app.src,*.yaws,*.xrl,*.es set ft=erlang
