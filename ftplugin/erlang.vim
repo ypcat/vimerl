@@ -30,6 +30,8 @@ endif
 let s:erlang_fun_begin = '^\(\a\w*\|[''][^'']*['']\)(.*$'
 let s:erlang_fun_end   = '^[^%]*\.\s*\(%.*\)\?$'
 
+let s:erlang_include_file = expand('<sfile>:p:h') . '/erlang_path.erl'
+
 function s:SetErlangOptions()
 	if executable('erl') != 1
 		echohl ErrorMsg
@@ -55,6 +57,10 @@ function s:SetErlangOptions()
 	setlocal suffixesadd=.erl
 	let libs = substitute(system('which erl'), '/bin/erl', '/lib/erlang/lib/**/src/', '')
 	execute 'setlocal path+=' . libs
+	let rebar_inc = system(s:erlang_include_file)
+	execute 'setlocal path^=' . rebar_inc
+	let inc = globpath(expand('%:p:h') . '/..', 'include')
+	execute 'setlocal path^=' . inc
 	let &l:keywordprg = g:erlang_keywordprg
 endfunction
 
